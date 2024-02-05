@@ -21,7 +21,8 @@
         "text",
         "html",
         "squire",
-        "squire editor"
+        "squire editor",
+        "SSR Apps"
     ],
     "author": "Praveen Yadav",
     "license": "MIT",
