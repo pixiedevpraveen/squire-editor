@@ -101,18 +101,25 @@
   var TEXT_NODE = 3;
   var DOCUMENT_FRAGMENT_NODE = 11;
   var ZWS = "\u200B";
-  var ua = navigator.userAgent;
-  var isMac = /Mac OS X/.test(ua);
-  var isWin = /Windows NT/.test(ua);
-  var isIOS = /iP(?:ad|hone|od)/.test(ua) || isMac && !!navigator.maxTouchPoints;
-  var isAndroid = /Android/.test(ua);
-  var isGecko = /Gecko\//.test(ua);
-  var isLegacyEdge = /Edge\//.test(ua);
-  var isWebKit = !isLegacyEdge && /WebKit\//.test(ua);
-  var ctrlKey = isMac || isIOS ? "Meta-" : "Ctrl-";
-  var cantFocusEmptyTextNodes = isWebKit;
-  var supportsInputEvents = "onbeforeinput" in document && "inputType" in new InputEvent("input");
   var notWS = /[^ \t\r\n]/;
+  var CONSTANTS = {};
+  function getConstants() {
+    if (!CONSTANTS.init) {
+      CONSTANTS.ua = navigator.userAgent;
+      CONSTANTS.isMac = /Mac OS X/.test(CONSTANTS.ua);
+      CONSTANTS.isIOS = /iP(?:ad|hone|od)/.test(CONSTANTS.ua) || CONSTANTS.isMac && !!navigator.maxTouchPoints;
+      CONSTANTS.isLegacyEdge = /Edge\//.test(CONSTANTS.ua);
+      CONSTANTS.isWebKit = !CONSTANTS.isLegacyEdge && /WebKit\//.test(CONSTANTS.ua);
+      CONSTANTS.isWin = /Windows NT/.test(CONSTANTS.ua);
+      CONSTANTS.isAndroid = /Android/.test(CONSTANTS.ua);
+      CONSTANTS.isGecko = /Gecko\//.test(CONSTANTS.ua);
+      CONSTANTS.ctrlKey = CONSTANTS.isMac || CONSTANTS.isIOS ? "Meta-" : "Ctrl-";
+      CONSTANTS.cantFocusEmptyTextNodes = CONSTANTS.isWebKit;
+      CONSTANTS.supportsInputEvents = "onbeforeinput" in document && "inputType" in new InputEvent("input");
+      CONSTANTS.init = true;
+    }
+    return CONSTANTS;
+  }
 
   // source/node/Category.ts
   var inlineNodeNames = /^(?:#text|A(?:BBR|CRONYM)?|B(?:R|D[IO])?|C(?:ITE|ODE)|D(?:ATA|EL|FN)|EM|FONT|HR|I(?:FRAME|MG|NPUT|NS)?|KBD|Q|R(?:P|T|UBY)|S(?:AMP|MALL|PAN|TR(?:IKE|ONG)|U[BP])?|TIME|U|VAR|WBR)$/;
@@ -430,6 +437,7 @@
 
   // source/node/MergeSplit.ts
   var fixCursor = (node) => {
+    const { cantFocusEmptyTextNodes } = getConstants();
     let fixer = null;
     if (node instanceof Text) {
       return node;
@@ -1364,6 +1372,7 @@
   // source/Clipboard.ts
   var indexOf = Array.prototype.indexOf;
   var extractRangeToClipboard = (event, range, root, removeRangeFromDocument, toCleanHTML, toPlainText, plainTextOnly) => {
+    const { isLegacyEdge, isWin } = getConstants();
     const clipboardData = event.clipboardData;
     if (isLegacyEdge || !clipboardData) {
       return false;
@@ -1462,6 +1471,7 @@
     this._isShiftDown = event.shiftKey;
   };
   var _onPaste = function(event) {
+    const { isLegacyEdge, isGecko } = getConstants();
     const clipboardData = event.clipboardData;
     const items = clipboardData == null ? void 0 : clipboardData.items;
     const choosePlain = this._isShiftDown;
@@ -1847,6 +1857,7 @@
   // source/keyboard/Space.ts
   var Space = (self, event, range) => {
     var _a;
+    const { cantFocusEmptyTextNodes } = getConstants();
     let node;
     const root = self._root;
     self._recordUndoState(range);
@@ -1916,163 +1927,167 @@
     220: "\\",
     221: "]"
   };
-  var _onKey = function(event) {
-    const code = event.keyCode;
-    let key = keys[code];
-    let modifiers = "";
-    const range = this.getSelection();
-    if (event.defaultPrevented) {
-      return;
-    }
-    if (!key) {
-      key = String.fromCharCode(code).toLowerCase();
-      if (!/^[A-Za-z0-9]$/.test(key)) {
-        key = "";
+  function getKeyHandlers() {
+    const { isWin, ctrlKey, supportsInputEvents, isIOS, isMac } = getConstants();
+    const _onKey = function(event) {
+      const code = event.keyCode;
+      let key = keys[code];
+      let modifiers = "";
+      const range = this.getSelection();
+      if (event.defaultPrevented) {
+        return;
       }
-    }
-    if (111 < code && code < 124) {
-      key = "F" + (code - 111);
-    }
-    if (key !== "Backspace" && key !== "Delete") {
-      if (event.altKey) {
-        modifiers += "Alt-";
+      if (!key) {
+        key = String.fromCharCode(code).toLowerCase();
+        if (!/^[A-Za-z0-9]$/.test(key)) {
+          key = "";
+        }
       }
-      if (event.ctrlKey) {
-        modifiers += "Ctrl-";
+      if (111 < code && code < 124) {
+        key = "F" + (code - 111);
       }
-      if (event.metaKey) {
-        modifiers += "Meta-";
+      if (key !== "Backspace" && key !== "Delete") {
+        if (event.altKey) {
+          modifiers += "Alt-";
+        }
+        if (event.ctrlKey) {
+          modifiers += "Ctrl-";
+        }
+        if (event.metaKey) {
+          modifiers += "Meta-";
+        }
+        if (event.shiftKey) {
+          modifiers += "Shift-";
+        }
       }
-      if (event.shiftKey) {
+      if (isWin && event.shiftKey && key === "Delete") {
         modifiers += "Shift-";
       }
-    }
-    if (isWin && event.shiftKey && key === "Delete") {
-      modifiers += "Shift-";
-    }
-    key = modifiers + key;
-    if (this._keyHandlers[key]) {
-      this._keyHandlers[key](this, event, range);
-    } else if (!range.collapsed && // !event.isComposing stops us from blatting Kana-Kanji conversion in
-    // Safari
-    !event.isComposing && !event.ctrlKey && !event.metaKey && (event.key || key).length === 1) {
-      this.saveUndoState(range);
-      deleteContentsOfRange(range, this._root);
-      this._ensureBottomLine();
-      this.setSelection(range);
-      this._updatePath(range, true);
-    }
-  };
-  var keyHandlers = {
-    "Backspace": Backspace,
-    "Delete": Delete,
-    "Tab": Tab,
-    "Shift-Tab": ShiftTab,
-    "Space": Space,
-    "ArrowLeft"(self) {
-      self._removeZWS();
-    },
-    "ArrowRight"(self, event, range) {
-      self._removeZWS();
-      const root = self.getRoot();
-      if (rangeDoesEndAtBlockBoundary(range, root)) {
-        moveRangeBoundariesDownTree(range);
-        let node = range.endContainer;
-        do {
-          if (node.nodeName === "CODE") {
-            let next = node.nextSibling;
-            if (!(next instanceof Text)) {
-              const textNode = document.createTextNode("\xA0");
-              node.parentNode.insertBefore(textNode, next);
-              next = textNode;
+      key = modifiers + key;
+      if (this._keyHandlers[key]) {
+        this._keyHandlers[key](this, event, range);
+      } else if (!range.collapsed && // !event.isComposing stops us from blatting Kana-Kanji conversion in
+      // Safari
+      !event.isComposing && !event.ctrlKey && !event.metaKey && (event.key || key).length === 1) {
+        this.saveUndoState(range);
+        deleteContentsOfRange(range, this._root);
+        this._ensureBottomLine();
+        this.setSelection(range);
+        this._updatePath(range, true);
+      }
+    };
+    const keyHandlers = {
+      "Backspace": Backspace,
+      "Delete": Delete,
+      "Tab": Tab,
+      "Shift-Tab": ShiftTab,
+      "Space": Space,
+      "ArrowLeft"(self) {
+        self._removeZWS();
+      },
+      "ArrowRight"(self, event, range) {
+        self._removeZWS();
+        const root = self.getRoot();
+        if (rangeDoesEndAtBlockBoundary(range, root)) {
+          moveRangeBoundariesDownTree(range);
+          let node = range.endContainer;
+          do {
+            if (node.nodeName === "CODE") {
+              let next = node.nextSibling;
+              if (!(next instanceof Text)) {
+                const textNode = document.createTextNode("\xA0");
+                node.parentNode.insertBefore(textNode, next);
+                next = textNode;
+              }
+              range.setStart(next, 1);
+              self.setSelection(range);
+              event.preventDefault();
+              break;
             }
-            range.setStart(next, 1);
-            self.setSelection(range);
-            event.preventDefault();
-            break;
-          }
-        } while (!node.nextSibling && (node = node.parentNode) && node !== root);
+          } while (!node.nextSibling && (node = node.parentNode) && node !== root);
+        }
       }
+    };
+    if (!supportsInputEvents) {
+      keyHandlers.Enter = Enter;
+      keyHandlers["Shift-Enter"] = Enter;
     }
-  };
-  if (!supportsInputEvents) {
-    keyHandlers.Enter = Enter;
-    keyHandlers["Shift-Enter"] = Enter;
-  }
-  if (!isMac && !isIOS) {
-    keyHandlers.PageUp = (self) => {
-      self.moveCursorToStart();
+    if (!isMac && !isIOS) {
+      keyHandlers.PageUp = (self) => {
+        self.moveCursorToStart();
+      };
+      keyHandlers.PageDown = (self) => {
+        self.moveCursorToEnd();
+      };
+    }
+    const mapKeyToFormat = (tag, remove) => {
+      remove = remove || null;
+      return (self, event) => {
+        event.preventDefault();
+        const range = self.getSelection();
+        if (self.hasFormat(tag, null, range)) {
+          self.changeFormat(null, { tag }, range);
+        } else {
+          self.changeFormat({ tag }, remove, range);
+        }
+      };
     };
-    keyHandlers.PageDown = (self) => {
-      self.moveCursorToEnd();
-    };
-  }
-  var mapKeyToFormat = (tag, remove) => {
-    remove = remove || null;
-    return (self, event) => {
+    keyHandlers[ctrlKey + "b"] = mapKeyToFormat("B");
+    keyHandlers[ctrlKey + "i"] = mapKeyToFormat("I");
+    keyHandlers[ctrlKey + "u"] = mapKeyToFormat("U");
+    keyHandlers[ctrlKey + "Shift-7"] = mapKeyToFormat("S");
+    keyHandlers[ctrlKey + "Shift-5"] = mapKeyToFormat("SUB", { tag: "SUP" });
+    keyHandlers[ctrlKey + "Shift-6"] = mapKeyToFormat("SUP", { tag: "SUB" });
+    keyHandlers[ctrlKey + "Shift-8"] = (self, event) => {
       event.preventDefault();
-      const range = self.getSelection();
-      if (self.hasFormat(tag, null, range)) {
-        self.changeFormat(null, { tag }, range);
+      const path = self.getPath();
+      if (!/(?:^|>)UL/.test(path)) {
+        self.makeUnorderedList();
       } else {
-        self.changeFormat({ tag }, remove, range);
+        self.removeList();
       }
     };
-  };
-  keyHandlers[ctrlKey + "b"] = mapKeyToFormat("B");
-  keyHandlers[ctrlKey + "i"] = mapKeyToFormat("I");
-  keyHandlers[ctrlKey + "u"] = mapKeyToFormat("U");
-  keyHandlers[ctrlKey + "Shift-7"] = mapKeyToFormat("S");
-  keyHandlers[ctrlKey + "Shift-5"] = mapKeyToFormat("SUB", { tag: "SUP" });
-  keyHandlers[ctrlKey + "Shift-6"] = mapKeyToFormat("SUP", { tag: "SUB" });
-  keyHandlers[ctrlKey + "Shift-8"] = (self, event) => {
-    event.preventDefault();
-    const path = self.getPath();
-    if (!/(?:^|>)UL/.test(path)) {
-      self.makeUnorderedList();
-    } else {
-      self.removeList();
-    }
-  };
-  keyHandlers[ctrlKey + "Shift-9"] = (self, event) => {
-    event.preventDefault();
-    const path = self.getPath();
-    if (!/(?:^|>)OL/.test(path)) {
-      self.makeOrderedList();
-    } else {
-      self.removeList();
-    }
-  };
-  keyHandlers[ctrlKey + "["] = (self, event) => {
-    event.preventDefault();
-    const path = self.getPath();
-    if (/(?:^|>)BLOCKQUOTE/.test(path) || !/(?:^|>)[OU]L/.test(path)) {
-      self.decreaseQuoteLevel();
-    } else {
-      self.decreaseListLevel();
-    }
-  };
-  keyHandlers[ctrlKey + "]"] = (self, event) => {
-    event.preventDefault();
-    const path = self.getPath();
-    if (/(?:^|>)BLOCKQUOTE/.test(path) || !/(?:^|>)[OU]L/.test(path)) {
-      self.increaseQuoteLevel();
-    } else {
-      self.increaseListLevel();
-    }
-  };
-  keyHandlers[ctrlKey + "d"] = (self, event) => {
-    event.preventDefault();
-    self.toggleCode();
-  };
-  keyHandlers[ctrlKey + "z"] = (self, event) => {
-    event.preventDefault();
-    self.undo();
-  };
-  keyHandlers[ctrlKey + "y"] = keyHandlers[ctrlKey + "Shift-z"] = (self, event) => {
-    event.preventDefault();
-    self.redo();
-  };
+    keyHandlers[ctrlKey + "Shift-9"] = (self, event) => {
+      event.preventDefault();
+      const path = self.getPath();
+      if (!/(?:^|>)OL/.test(path)) {
+        self.makeOrderedList();
+      } else {
+        self.removeList();
+      }
+    };
+    keyHandlers[ctrlKey + "["] = (self, event) => {
+      event.preventDefault();
+      const path = self.getPath();
+      if (/(?:^|>)BLOCKQUOTE/.test(path) || !/(?:^|>)[OU]L/.test(path)) {
+        self.decreaseQuoteLevel();
+      } else {
+        self.decreaseListLevel();
+      }
+    };
+    keyHandlers[ctrlKey + "]"] = (self, event) => {
+      event.preventDefault();
+      const path = self.getPath();
+      if (/(?:^|>)BLOCKQUOTE/.test(path) || !/(?:^|>)[OU]L/.test(path)) {
+        self.increaseQuoteLevel();
+      } else {
+        self.increaseListLevel();
+      }
+    };
+    keyHandlers[ctrlKey + "d"] = (self, event) => {
+      event.preventDefault();
+      self.toggleCode();
+    };
+    keyHandlers[ctrlKey + "z"] = (self, event) => {
+      event.preventDefault();
+      self.undo();
+    };
+    keyHandlers[ctrlKey + "y"] = keyHandlers[ctrlKey + "Shift-z"] = (self, event) => {
+      event.preventDefault();
+      self.redo();
+    };
+    return { _onKey, keyHandlers };
+  }
 
   // source/Editor.ts
   var Squire = class {
@@ -2181,6 +2196,7 @@
         _monitorShiftKey
       );
       this.addEventListener("keyup", _monitorShiftKey);
+      const { _onKey, keyHandlers } = getKeyHandlers();
       this.addEventListener("keydown", _onKey);
       this._keyHandlers = Object.create(keyHandlers);
       const mutation = new MutationObserver(() => this._docWasChanged());
@@ -2250,6 +2266,7 @@
       return this;
     }
     _beforeInput(event) {
+      const { isAndroid } = getConstants();
       switch (event.inputType) {
         case "insertText":
           if (isAndroid && event.data && event.data.includes("\n")) {
@@ -3202,6 +3219,7 @@
       return range;
     }
     _removeFormat(tag, attributes, range, partial) {
+      const { cantFocusEmptyTextNodes } = getConstants();
       this._saveRangeToBookmark(range);
       let fixer;
       if (range.collapsed) {

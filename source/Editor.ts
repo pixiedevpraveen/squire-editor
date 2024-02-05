@@ -41,7 +41,7 @@ import {
 } from './node/MergeSplit';
 import { getBlockWalker, getNextBlock, isEmptyBlock } from './node/Block';
 import { cleanTree, cleanupBRs, escapeHTML, removeEmptyInlines } from './Clean';
-import { cantFocusEmptyTextNodes, isAndroid, ZWS } from './Constants';
+import { getConstants, ZWS } from './Constants';
 import {
     expandRangeToBlockBoundaries,
     getEndBlockOfRange,
@@ -56,7 +56,7 @@ import {
     _onDrop,
     _onPaste,
 } from './Clipboard';
-import { keyHandlers, _onKey } from './keyboard/KeyHandlers';
+import { getKeyHandlers } from './keyboard/KeyHandlers';
 import { linkifyText } from './keyboard/KeyHelpers';
 import { getTextContentsOfRange } from './range/Contents';
 
@@ -168,6 +168,7 @@ class Squire {
         );
         this.addEventListener('keyup', _monitorShiftKey as (e: Event) => void);
 
+        const { _onKey, keyHandlers } = getKeyHandlers()
         // Keyboard support
         this.addEventListener('keydown', _onKey as (e: Event) => void);
         this._keyHandlers = Object.create(keyHandlers);
@@ -255,6 +256,7 @@ class Squire {
     }
 
     _beforeInput(event: InputEvent): void {
+        const { isAndroid } = getConstants()
         switch (event.inputType) {
             case 'insertText':
                 // Generally we let the browser handle text insertion, as it
@@ -389,8 +391,8 @@ class Squire {
                 detail instanceof Event
                     ? detail
                     : new CustomEvent(type, {
-                          detail,
-                      });
+                        detail,
+                    });
             // Clone handlers array, so any handlers added/removed do not
             // affect it.
             handlers = handlers.slice();
@@ -1021,7 +1023,7 @@ class Squire {
         const range =
             this._getRangeAndRemoveBookmark() ||
             createRange(root.firstElementChild || root, 0);
-        this.saveUndoState(range);
+            this.saveUndoState(range);
 
         // Set inital selection
         this.setSelection(range);
@@ -1520,6 +1522,7 @@ class Squire {
         partial?: boolean,
     ): Range {
         // Add bookmark
+        const { cantFocusEmptyTextNodes } = getConstants()
         this._saveRangeToBookmark(range);
 
         // We need a node in the selection to break the surrounding
@@ -1843,12 +1846,12 @@ class Squire {
         return this.changeFormat(
             name
                 ? {
-                      tag: 'SPAN',
-                      attributes: {
-                          class: className,
-                          style: 'font-family: ' + name + ', sans-serif;',
-                      },
-                  }
+                    tag: 'SPAN',
+                    attributes: {
+                        class: className,
+                        style: 'font-family: ' + name + ', sans-serif;',
+                    },
+                }
                 : null,
             {
                 tag: 'SPAN',
@@ -1862,14 +1865,14 @@ class Squire {
         return this.changeFormat(
             size
                 ? {
-                      tag: 'SPAN',
-                      attributes: {
-                          class: className,
-                          style:
-                              'font-size: ' +
-                              (typeof size === 'number' ? size + 'px' : size),
-                      },
-                  }
+                    tag: 'SPAN',
+                    attributes: {
+                        class: className,
+                        style:
+                            'font-size: ' +
+                            (typeof size === 'number' ? size + 'px' : size),
+                    },
+                }
                 : null,
             {
                 tag: 'SPAN',
@@ -1883,12 +1886,12 @@ class Squire {
         return this.changeFormat(
             color
                 ? {
-                      tag: 'SPAN',
-                      attributes: {
-                          class: className,
-                          style: 'color:' + color,
-                      },
-                  }
+                    tag: 'SPAN',
+                    attributes: {
+                        class: className,
+                        style: 'color:' + color,
+                    },
+                }
                 : null,
             {
                 tag: 'SPAN',
@@ -1902,12 +1905,12 @@ class Squire {
         return this.changeFormat(
             color
                 ? {
-                      tag: 'SPAN',
-                      attributes: {
-                          class: className,
-                          style: 'background-color:' + color,
-                      },
-                  }
+                    tag: 'SPAN',
+                    attributes: {
+                        class: className,
+                        style: 'background-color:' + color,
+                    },
+                }
                 : null,
             {
                 tag: 'SPAN',

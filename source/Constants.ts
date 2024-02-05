@@ -6,27 +6,46 @@ const DOCUMENT_FRAGMENT_NODE = 11; // Node.DOCUMENT_FRAGMENT_NODE;
 
 const ZWS = '\u200B';
 
-const ua = navigator.userAgent;
-
-const isMac = /Mac OS X/.test(ua);
-const isWin = /Windows NT/.test(ua);
-const isIOS =
-    /iP(?:ad|hone|od)/.test(ua) || (isMac && !!navigator.maxTouchPoints);
-const isAndroid = /Android/.test(ua);
-
-const isGecko = /Gecko\//.test(ua);
-const isLegacyEdge = /Edge\//.test(ua);
-const isWebKit = !isLegacyEdge && /WebKit\//.test(ua);
-
-const ctrlKey = isMac || isIOS ? 'Meta-' : 'Ctrl-';
-
-const cantFocusEmptyTextNodes = isWebKit;
-
-const supportsInputEvents =
-    'onbeforeinput' in document && 'inputType' in new InputEvent('input');
-
 // Use [^ \t\r\n] instead of \S so that nbsp does not count as white-space
 const notWS = /[^ \t\r\n]/;
+
+
+const CONSTANTS = {} as {
+    init: boolean
+    ua: string
+    isMac: boolean
+    isWin: boolean
+    isIOS: boolean
+    isAndroid: boolean
+    isGecko: boolean
+    isLegacyEdge: boolean
+    isWebKit: boolean
+    ctrlKey: "Meta-" | "Ctrl-"
+    cantFocusEmptyTextNodes: boolean
+    supportsInputEvents: boolean
+}
+
+function getConstants() {
+    if (!CONSTANTS.init) {
+
+        CONSTANTS.ua = navigator.userAgent;
+        CONSTANTS.isMac = /Mac OS X/.test(CONSTANTS.ua);
+        CONSTANTS.isIOS =
+            /iP(?:ad|hone|od)/.test(CONSTANTS.ua) || (CONSTANTS.isMac && !!navigator.maxTouchPoints);
+        CONSTANTS.isLegacyEdge = /Edge\//.test(CONSTANTS.ua);
+        CONSTANTS.isWebKit = !CONSTANTS.isLegacyEdge && /WebKit\//.test(CONSTANTS.ua);
+        CONSTANTS.isWin = /Windows NT/.test(CONSTANTS.ua);
+        CONSTANTS.isAndroid = /Android/.test(CONSTANTS.ua);
+        CONSTANTS.isGecko = /Gecko\//.test(CONSTANTS.ua);
+        CONSTANTS.ctrlKey = CONSTANTS.isMac || CONSTANTS.isIOS ? 'Meta-' : 'Ctrl-';
+        CONSTANTS.cantFocusEmptyTextNodes = CONSTANTS.isWebKit;
+        CONSTANTS.supportsInputEvents =
+            'onbeforeinput' in document && 'inputType' in new InputEvent('input');
+        CONSTANTS.init = true
+    }
+
+    return CONSTANTS
+}
 
 // ---
 
@@ -38,15 +57,5 @@ export {
     DOCUMENT_FRAGMENT_NODE,
     notWS,
     ZWS,
-    ua,
-    isMac,
-    isWin,
-    isIOS,
-    isAndroid,
-    isGecko,
-    isLegacyEdge,
-    isWebKit,
-    ctrlKey,
-    cantFocusEmptyTextNodes,
-    supportsInputEvents,
+    getConstants
 };

@@ -9,11 +9,13 @@ import {
     rangeDoesEndAtBlockBoundary,
 } from '../range/Block';
 import { SHOW_TEXT, TreeIterator } from '../node/TreeIterator';
-import { ZWS, cantFocusEmptyTextNodes } from '../Constants';
+import { ZWS, getConstants } from '../Constants';
 
 // ---
 
 const Space = (self: Squire, event: KeyboardEvent, range: Range): void => {
+    const { cantFocusEmptyTextNodes } = getConstants()
+
     let node: Node | null;
     const root = self._root;
     self._recordUndoState(range);
