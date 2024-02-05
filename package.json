@@ -1,6 +1,6 @@
 {
     "name": "squire-editor",
-    "version": "0.1.0",
+    "version": "0.5.0",
     "description": "Squire editor is an HTML5 rich text editor, which provides powerful cross-browser normalisation, whilst being supremely lightweight and flexible.",
     "main": "dist/squire.mjs",
     "types": "dist/types/Squire.d.ts",
