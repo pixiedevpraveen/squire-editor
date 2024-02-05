@@ -2202,7 +2202,7 @@
       const mutation = new MutationObserver(() => this._docWasChanged());
       mutation.observe(root, {
         childList: true,
-        attributes: true,
+        attributes: this._config.watchRootAttributes,
         characterData: true,
         subtree: true
       });
@@ -2228,6 +2228,7 @@
         blockTag: "DIV",
         blockAttributes: null,
         tagAttributes: {},
+        watchRootAttributes: true,
         classNames: {
           color: "color",
           fontFamily: "font",
@@ -2697,7 +2698,7 @@
       if (mutation) {
         mutation.observe(this._root, {
           childList: true,
-          attributes: true,
+          attributes: this._config.watchRootAttributes,
           characterData: true,
           subtree: true
         });

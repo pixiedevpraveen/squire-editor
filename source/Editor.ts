@@ -76,6 +76,7 @@ interface SquireConfig {
     blockTag: string;
     blockAttributes: null | Record<string, string>;
     tagAttributes: TagAttributes;
+    watchRootAttributes: boolean;
     classNames: {
         color: string;
         fontFamily: string;
@@ -176,7 +177,7 @@ class Squire {
         const mutation = new MutationObserver(() => this._docWasChanged());
         mutation.observe(root, {
             childList: true,
-            attributes: true,
+            attributes: this._config.watchRootAttributes,
             characterData: true,
             subtree: true,
         });
@@ -212,6 +213,7 @@ class Squire {
             blockTag: 'DIV',
             blockAttributes: null,
             tagAttributes: {},
+            watchRootAttributes: true,
             classNames: {
                 color: 'color',
                 fontFamily: 'font',
@@ -800,7 +802,7 @@ class Squire {
         if (mutation) {
             mutation.observe(this._root, {
                 childList: true,
-                attributes: true,
+                attributes: this._config.watchRootAttributes,
                 characterData: true,
                 subtree: true,
             });

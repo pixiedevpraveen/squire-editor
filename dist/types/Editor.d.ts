@@ -11,6 +11,7 @@ interface SquireConfig {
     blockTag: string;
     blockAttributes: null | Record<string, string>;
     tagAttributes: TagAttributes;
+    watchRootAttributes: boolean;
     classNames: {
         color: string;
         fontFamily: string;
