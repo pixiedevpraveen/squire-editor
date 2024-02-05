@@ -1014,22 +1014,30 @@ class Squire {
         root.appendChild(frag);
 
         // Reset the undo stack
-        this._undoIndex = -1;
-        this._undoStack.length = 0;
-        this._undoStackLength = 0;
-        this._isInUndoState = false;
+        this.clearUndoStack()
 
         // Record undo state
         const range =
             this._getRangeAndRemoveBookmark() ||
             createRange(root.firstElementChild || root, 0);
-            this.saveUndoState(range);
+
+        this.saveUndoState(range);
 
         // Set inital selection
         this.setSelection(range);
         this._updatePath(range, true);
 
         return this;
+    }
+
+    /**
+     * Reset the undo stack
+    */
+    clearUndoStack() {
+        this._undoIndex = -1;
+        this._undoStack.length = 0;
+        this._undoStackLength = 0;
+        this._isInUndoState = false;
     }
 
     /**

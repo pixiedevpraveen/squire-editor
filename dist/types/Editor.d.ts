@@ -97,6 +97,10 @@ declare class Squire {
     getHTML(withBookmark?: boolean): string;
     setHTML(html: string): Squire;
     /**
+     * Reset the undo stack
+    */
+    clearUndoStack(): void;
+    /**
      * Insert HTML at the cursor location. If the selection is not collapsed
      * insertTreeFragmentIntoRange will delete the selection so that it is
      * replaced by the html being inserted.

@@ -2866,15 +2866,21 @@
         root.removeChild(child);
       }
       root.appendChild(frag);
-      this._undoIndex = -1;
-      this._undoStack.length = 0;
-      this._undoStackLength = 0;
-      this._isInUndoState = false;
+      this.clearUndoStack();
       const range = this._getRangeAndRemoveBookmark() || createRange(root.firstElementChild || root, 0);
       this.saveUndoState(range);
       this.setSelection(range);
       this._updatePath(range, true);
       return this;
+    }
+    /**
+     * Reset the undo stack
+    */
+    clearUndoStack() {
+      this._undoIndex = -1;
+      this._undoStack.length = 0;
+      this._undoStackLength = 0;
+      this._isInUndoState = false;
     }
     /**
      * Insert HTML at the cursor location. If the selection is not collapsed
