@@ -2,20 +2,19 @@
 
 Squire is an HTML5 rich text editor, which provides powerful cross-browser normalisation in a flexible lightweight package (only 16KB of JS after minification and gzip, with no dependencies!).
 
+This Editor is *fork* of fastmail's [Squire-rte](https://github.com/fastmail/Squire). **I modified it because it previously caused errors with ssr web apps (nextjs/nuxtjs) by calling some of its internal browser-related attributes while importing the editor. Now it also has a method to clear the undo state and a config option to store watching the attribute changes of the root element.**
+
 It was designed to handle email composition for the [Fastmail](https://www.fastmail.com) web app. The most important consequence of this (and where Squire differs from most other modern rich text editors) is that it must handle arbitrary HTML, because it may be used to forward or quote emails from third-parties and must be able to preserve their HTML without breaking the formatting. This means that it can't use a more structured (but limited) internal data model (as most other modern HTML editors do) and the HTML remains the source-of-truth. The other consequence is excellent handling of multiple levels of blockquotes.
 
 Squire is designed to be integrated with your own UI framework, and so does not provide its own UI toolbar, widgets or overlays. Instead, you get a component you can insert in place of a `<textarea>` and manipulate programmatically, allowing you to integrate seamlessly with the rest of your application and lose the bloat of having two UI toolkits loaded.
 
 Squire supports all reasonably recent browsers. It no longer supports any version of IE.
 
-In addition to its use at [Fastmail](https://www.fastmail.com), it is also currently used in production at [ProtonMail](https://protonmail.com/), [SnappyMail](https://github.com/the-djmaze/snappymail), [StartMail](https://startmail.com/), [Tutanota](https://tutanota.com), [Zoho Mail](https://www.zoho.com/mail/), [Superhuman](https://superhuman.com/) and [Teamwork Desk](https://www.teamwork.com/desk/), as well as other non-mail apps including [Google Earth](https://www.google.com/earth/) (drop me a line if you're using Squire elsewhere, I'm always interested to hear about it!).
-
-For a demo of the latest version with a production-level UI integration, [sign up for a free Fastmail trial](https://www.fastmail.com/signup/) :). There's also a very bare-bones integration in the repo; just clone it and open `Demo.html`. If you are reporting a bug, please report the steps to reproduce using `Demo.html`, to make sure it's not a bug in your integration.
 
 ## Installation and usage
 
-1. Add Squire to your project: `npm install squire-rte`
-2. In your code, `import Squire from 'squire-rte';`
+1. Add Squire to your project: `npm install squire-editor`
+2. In your code, `import Squire from 'squire-editor';`
 3. Create your editor by calling `editor = new Squire(node);`.
 
 ### Invoke with script tag
