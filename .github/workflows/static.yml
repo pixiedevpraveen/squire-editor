@@ -26,7 +26,7 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ github.repository_owner }}/${{ github.event.repository.name }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -34,9 +34,9 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
-          # Upload entire repository
+          name: demo-html
           path: './Demo.html'
       - name: Deploy to GitHub Pages
         id: deployment
