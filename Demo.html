@@ -129,6 +129,7 @@
         <span id="makeLink" class="prompt">Link</span>
       </p>
       <p>
+        <span id="setTextAlignment" class="prompt">Align</span>
         <span id="increaseQuoteLevel">Quote</span>
         <span id="decreaseQuoteLevel">Dequote</span>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -153,9 +154,13 @@
     <div id="editor">
       <div class="paragraph"><b>sfddddddd</b><br></div>
       <div class="paragraph">as<br></div>
-      <div class="paragraph">d<br></div>
-      <div class="paragraph">as<br></div>
-      <div class="paragraph">d<br></div>
+      <ul class="UL">
+        <li class="listItem">d<br></li>
+        <li class="listItem">as<br></li>
+      </ul>
+      <div class="paragraph pr-align-center" style="text-align: center;">sdasdad<br></div>
+      <div class="paragraph">https://github.com/pixiedevpraveen/squire-editor<br>
+      </div>
       <div class="paragraph">as<br></div>
       <div class="paragraph">d<br></div>
       <div class="paragraph">a<br></div>
@@ -169,9 +174,12 @@
       console.log("before create");
       var editor = new Squire(editorEl, {
         blockTag: 'div',
+        classNames: {
+          align: "pr-align"
+        },
         blockAttributes: { 'class': 'paragraph' },
         watchRootAttributes: false,
-        sanitizeToDOMFragment: (h, e) => { /* console.log(h);  */const el = document.createElement("div"); el.innerHTML = h; const d = document.createDocumentFragment(); d.append(...el.children); return d },
+        sanitizeToDOMFragment: (h, e) => { /* console.log(h);  */const el = document.createElement("div"); el.innerHTML = h; const d = document.createDocumentFragment(); d.append(...el.childNodes); return d },
         tagAttributes: {
           ul: { 'class': 'UL' },
           ol: { 'class': 'OL' },
@@ -211,7 +219,7 @@
         var id = e.target.id,
           value;
 
-          if (id && editor) {
+        if (id && editor) {
           if (id === "enableEditor") {
             editorEl.contentEditable = "true"
           } else if (id === "disableEditor") {

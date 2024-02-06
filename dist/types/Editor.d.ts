@@ -17,6 +17,7 @@ interface SquireConfig {
         fontFamily: string;
         fontSize: string;
         highlight: string;
+        align: string;
     };
     undo: {
         documentSizeThreshold: number;
@@ -156,7 +157,7 @@ declare class Squire {
     splitBlock(lineBreakOnly: boolean, range?: Range): Squire;
     forEachBlock(fn: (el: HTMLElement) => any, mutates: boolean, range?: Range): Squire;
     modifyBlocks(modify: (x: DocumentFragment) => Node, range?: Range): Squire;
-    setTextAlignment(alignment: string): Squire;
+    setTextAlignment(alignment: "left" | "right" | "center" | "justify" | string): Squire;
     setTextDirection(direction: string | null): Squire;
     _getListSelection(range: Range, root: Element): [Node, Node | null, Node | null] | null;
     increaseListLevel(range?: Range): Squire;

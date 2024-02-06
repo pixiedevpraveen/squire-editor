@@ -82,6 +82,7 @@ interface SquireConfig {
         fontFamily: string;
         fontSize: string;
         highlight: string;
+        align: string;
     };
     undo: {
         documentSizeThreshold: number;
@@ -219,6 +220,7 @@ class Squire {
                 fontFamily: 'font',
                 fontSize: 'size',
                 highlight: 'highlight',
+                align: 'align',
             },
             undo: {
                 documentSizeThreshold: -1, // -1 means no threshold
@@ -1828,6 +1830,7 @@ class Squire {
                         node,
                     );
                 }
+                
                 const child = createElement(
                     'A',
                     Object.assign(
@@ -2248,16 +2251,18 @@ class Squire {
 
     // ---
 
-    setTextAlignment(alignment: string): Squire {
+    setTextAlignment(alignment: "left" | "right" | "center" | "justify" | string): Squire {
+        const { align } = this._config.classNames
+        const assign = ["left", "right", "center", "justify"].includes(alignment)
         this.forEachBlock((block: HTMLElement) => {
             const className = block.className
                 .split(/\s+/)
                 .filter((klass) => {
-                    return !!klass && !/^align/.test(klass);
+                    return !!klass && !klass?.startsWith(align);
                 })
                 .join(' ');
-            if (alignment) {
-                block.className = className + ' align-' + alignment;
+            if (assign) {
+                block.className = (className ? className + ' ' : '') + align + '-' + alignment;
                 block.style.textAlign = alignment;
             } else {
                 block.className = className;

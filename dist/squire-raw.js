@@ -2233,7 +2233,8 @@
           color: "color",
           fontFamily: "font",
           fontSize: "size",
-          highlight: "highlight"
+          highlight: "highlight",
+          align: "align"
         },
         undo: {
           documentSizeThreshold: -1,
@@ -3706,12 +3707,14 @@
     }
     // ---
     setTextAlignment(alignment) {
+      const { align } = this._config.classNames;
+      const assign = ["left", "right", "center", "justify"].includes(alignment);
       this.forEachBlock((block) => {
         const className = block.className.split(/\s+/).filter((klass) => {
-          return !!klass && !/^align/.test(klass);
+          return !!klass && !(klass == null ? void 0 : klass.startsWith(align));
         }).join(" ");
-        if (alignment) {
-          block.className = className + " align-" + alignment;
+        if (assign) {
+          block.className = (className ? className + " " : "") + align + "-" + alignment;
           block.style.textAlign = alignment;
         } else {
           block.className = className;
