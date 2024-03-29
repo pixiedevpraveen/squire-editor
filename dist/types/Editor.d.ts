@@ -1,3 +1,5 @@
+type CustomEvents = 'pathChange' | 'select' | 'input' | 'pasteImage' | 'undoStateChange' | 'mutation';
+type Events = 'selectionchange' | 'blur' | 'mousedown' | 'touchstart' | 'focus' | 'cut' | 'copy' | 'paste' | 'drop' | 'keydown' | 'keyup' | 'keydown' | 'beforeinput';
 type EventHandler = {
     handleEvent: (e: Event) => void;
 } | ((e: Event) => void);
@@ -11,7 +13,7 @@ interface SquireConfig {
     blockTag: string;
     blockAttributes: null | Record<string, string>;
     tagAttributes: TagAttributes;
-    watchRootAttributes: boolean;
+    ignoreRootAttributes: boolean;
     classNames: {
         color: string;
         fontFamily: string;
@@ -39,7 +41,7 @@ declare class Squire {
     _lastAnchorNode: Node | null;
     _lastFocusNode: Node | null;
     _path: string;
-    _events: Map<string, Array<EventHandler>>;
+    _events: Map<(keyof HTMLElementEventMap) | CustomEvents | Events | string, Array<EventHandler>>;
     _undoIndex: number;
     _undoStack: Array<string>;
     _undoStackLength: number;
@@ -55,15 +57,15 @@ declare class Squire {
     setKeyHandler(key: string, fn: KeyHandlerFunction): this;
     _beforeInput(event: InputEvent): void;
     handleEvent(event: Event): void;
-    fireEvent(type: string, detail?: Event | object): Squire;
+    fireEvent(type: (keyof HTMLElementEventMap) | CustomEvents | Events | string, detail?: Event | object): Squire;
     /**
      * Subscribing to these events won't automatically add a listener to the
      * document node, since these events are fired in a custom manner by the
      * editor code.
      */
     customEvents: Set<string>;
-    addEventListener(type: string, fn: EventHandler): Squire;
-    removeEventListener(type: string, fn?: EventHandler): Squire;
+    addEventListener<K extends (keyof HTMLElementEventMap) | CustomEvents | Events | string>(type: K, fn: EventHandler): Squire;
+    removeEventListener<K extends (keyof HTMLElementEventMap) | CustomEvents | Events | string>(type: K, fn?: EventHandler): Squire;
     focus(): Squire;
     blur(): Squire;
     _enableRestoreSelection(): void;
@@ -84,8 +86,22 @@ declare class Squire {
     _updatePathOnEvent(): void;
     _updatePath(range: Range, force?: boolean): void;
     _getPath(node: Node): string;
+    /**
+     * This method is used to modify the document; changes will not be considered state changes.
+     * To modify the document asynchronously, use observe and unobserve.
+     * This method also uses those methods.
+     */
     modifyDocument(modificationFn: () => void): Squire;
+    /**
+     * Disable observing the changes of the document
+    */
+    unobserve(): Squire;
+    /**
+     * enable the observe process for the document.
+    */
+    observe(): Squire;
     _docWasChanged(): void;
+    _handleMutationChanges(records: MutationRecord[]): void;
     /**
      * Leaves bookmark.
      */
@@ -155,6 +171,12 @@ declare class Squire {
     createDefaultBlock(children?: Node[]): HTMLElement;
     tagAfterSplit: Record<string, string>;
     splitBlock(lineBreakOnly: boolean, range?: Range): Squire;
+    /**
+     * Used to do some operations on the selected blocks
+     * @param fn function to call on every blocks in selection. To stop next iteration return any truthy value
+     * @param mutates does your operations mutates/changes anything
+     * @param range optional custom range to modify in that range.
+    */
     forEachBlock(fn: (el: HTMLElement) => any, mutates: boolean, range?: Range): Squire;
     modifyBlocks(modify: (x: DocumentFragment) => Node, range?: Range): Squire;
     setTextAlignment(alignment: "left" | "right" | "center" | "justify" | string): Squire;

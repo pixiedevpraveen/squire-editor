@@ -64,6 +64,13 @@ declare const DOMPurify: any;
 
 // ---
 
+type CustomEvents = 'pathChange' | 'select' | 'input' | 'pasteImage' | 'undoStateChange' | 'mutation'
+
+type Events = 'selectionchange' | 'blur' | 'mousedown' | 'touchstart' | 'focus' | 'cut' | 'copy' | 'paste' | 'drop' | 'keydown' | 'keyup' | 'keydown' | 'beforeinput'
+
+// TODO type with respect to the event
+// type EventHandler<T> = { handleEvent: (e: Event) => void } | ((e: Event) => void);
+
 type EventHandler = { handleEvent: (e: Event) => void } | ((e: Event) => void);
 
 type KeyHandlerFunction = (x: Squire, y: KeyboardEvent, z: Range) => void;
@@ -76,7 +83,7 @@ interface SquireConfig {
     blockTag: string;
     blockAttributes: null | Record<string, string>;
     tagAttributes: TagAttributes;
-    watchRootAttributes: boolean;
+    ignoreRootAttributes: boolean;
     classNames: {
         color: string;
         fontFamily: string;
@@ -110,7 +117,7 @@ class Squire {
     _lastFocusNode: Node | null;
     _path: string;
 
-    _events: Map<string, Array<EventHandler>>;
+    _events: Map<(keyof HTMLElementEventMap) | CustomEvents | Events | string, Array<EventHandler>>;
 
     _undoIndex: number;
     _undoStack: Array<string>;
@@ -175,10 +182,10 @@ class Squire {
         this.addEventListener('keydown', _onKey as (e: Event) => void);
         this._keyHandlers = Object.create(keyHandlers);
 
-        const mutation = new MutationObserver(() => this._docWasChanged());
+        const mutation = new MutationObserver((r) => { this._handleMutationChanges(r) });
         mutation.observe(root, {
             childList: true,
-            attributes: this._config.watchRootAttributes,
+            attributes: true,
             characterData: true,
             subtree: true,
         });
@@ -214,7 +221,7 @@ class Squire {
             blockTag: 'DIV',
             blockAttributes: null,
             tagAttributes: {},
-            watchRootAttributes: true,
+            ignoreRootAttributes: false,
             classNames: {
                 color: 'color',
                 fontFamily: 'font',
@@ -369,7 +376,7 @@ class Squire {
         this.fireEvent(event.type, event);
     }
 
-    fireEvent(type: string, detail?: Event | object): Squire {
+    fireEvent(type: (keyof HTMLElementEventMap) | CustomEvents | Events | string, detail?: Event | object): Squire {
         let handlers = this._events.get(type);
         // UI code, especially modal views, may be monitoring for focus events
         // and immediately removing focus. In certain conditions, this can
@@ -426,9 +433,10 @@ class Squire {
         'input',
         'pasteImage',
         'undoStateChange',
+        'mutation',
     ]);
 
-    addEventListener(type: string, fn: EventHandler): Squire {
+    addEventListener<K extends (keyof HTMLElementEventMap) | CustomEvents | Events | string>(type: K, fn: /* K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K]: */ EventHandler): Squire {
         let handlers = this._events.get(type);
         let target: Document | HTMLElement = this._root;
         if (!handlers) {
@@ -445,7 +453,7 @@ class Squire {
         return this;
     }
 
-    removeEventListener(type: string, fn?: EventHandler): Squire {
+    removeEventListener<K extends (keyof HTMLElementEventMap) | CustomEvents | Events | string>(type: K, fn?: /* K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K]: */ EventHandler): Squire {
         const handlers = this._events.get(type);
         let target: Document | HTMLElement = this._root;
         if (handlers) {
@@ -640,7 +648,7 @@ class Squire {
         if (!this._isFocused) {
             this._enableRestoreSelection();
         } else {
-            const selection = window.getSelection();
+            const selection = (document['getSelection'] ? document : window).getSelection();
             if (selection) {
                 if ('setBaseAndExtent' in Selection.prototype) {
                     selection.setBaseAndExtent(
@@ -788,36 +796,58 @@ class Squire {
 
     // --- History
 
+    /**
+     * This method is used to modify the document; changes will not be considered state changes.
+     * To modify the document asynchronously, use observe and unobserve.
+     * This method also uses those methods.
+     */
     modifyDocument(modificationFn: () => void): Squire {
+        this.unobserve()
+        modificationFn();
+        this.observe()
+        return this;
+    }
+
+    /**
+     * Disable observing the changes of the document
+    */
+    unobserve(): Squire {
         const mutation = this._mutation;
         if (mutation) {
-            if (mutation.takeRecords().length) {
-                this._docWasChanged();
+            const recs = mutation.takeRecords()
+            if (recs.length) {
+                this._handleMutationChanges(recs);
             }
             mutation.disconnect();
         }
 
         this._ignoreAllChanges = true;
-        modificationFn();
+        return this
+    }
+
+    /**
+     * enable the observe process for the document.
+    */
+    observe(): Squire {
+        const mutation = this._mutation;
         this._ignoreAllChanges = false;
 
         if (mutation) {
             mutation.observe(this._root, {
                 childList: true,
-                attributes: this._config.watchRootAttributes,
+                attributes: true,
                 characterData: true,
                 subtree: true,
             });
             this._ignoreChange = false;
         }
-
-        return this;
+        return this
     }
 
     _docWasChanged(): void {
         resetNodeCategoryCache();
         this._mayHaveZWS = true;
-        if (this._ignoreAllChanges) {
+        if (!this.getRoot().isContentEditable || this._ignoreAllChanges) {
             return;
         }
 
@@ -833,6 +863,13 @@ class Squire {
             });
         }
         this.fireEvent('input');
+    }
+
+    _handleMutationChanges(records: MutationRecord[]): void {
+        this.fireEvent("mutation", { records })
+
+        if (!records.length || !this._config.ignoreRootAttributes || records.some(r => r.type !== "attributes" && r.target !== this.getRoot()))
+            this._docWasChanged()
     }
 
     /**
@@ -1020,17 +1057,6 @@ class Squire {
         // Reset the undo stack
         this.clearUndoStack()
 
-        // Record undo state
-        const range =
-            this._getRangeAndRemoveBookmark() ||
-            createRange(root.firstElementChild || root, 0);
-
-        this.saveUndoState(range);
-
-        // Set inital selection
-        this.setSelection(range);
-        this._updatePath(range, true);
-
         return this;
     }
 
@@ -1042,6 +1068,23 @@ class Squire {
         this._undoStack.length = 0;
         this._undoStackLength = 0;
         this._isInUndoState = false;
+
+        const root = this.getRoot()
+        // Record undo state
+        const range =
+            this._getRangeAndRemoveBookmark() ||
+            createRange(root.firstElementChild || root, 0);
+
+        this.saveUndoState(range);
+
+        // Set inital selection
+        this.setSelection(range);
+        this._updatePath(range, true);
+
+        this.fireEvent('undoStateChange', {
+            canUndo: false,
+            canRedo: false,
+        });
     }
 
     /**
@@ -1830,7 +1873,7 @@ class Squire {
                         node,
                     );
                 }
-                
+
                 const child = createElement(
                     'A',
                     Object.assign(
@@ -2162,6 +2205,12 @@ class Squire {
         return this;
     }
 
+    /**
+     * Used to do some operations on the selected blocks
+     * @param fn function to call on every blocks in selection. To stop next iteration return any truthy value
+     * @param mutates does your operations mutates/changes anything
+     * @param range optional custom range to modify in that range.
+    */
     forEachBlock(
         fn: (el: HTMLElement) => any,
         mutates: boolean,

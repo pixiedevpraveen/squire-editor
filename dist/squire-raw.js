@@ -1934,7 +1934,7 @@
       let key = keys[code];
       let modifiers = "";
       const range = this.getSelection();
-      if (event.defaultPrevented) {
+      if (event.defaultPrevented || !this.getRoot().isContentEditable) {
         return;
       }
       if (!key) {
@@ -2102,7 +2102,8 @@
         "select",
         "input",
         "pasteImage",
-        "undoStateChange"
+        "undoStateChange",
+        "mutation"
       ]);
       // ---
       this.startSelectionId = "squire-selection-start";
@@ -2199,10 +2200,12 @@
       const { _onKey, keyHandlers } = getKeyHandlers();
       this.addEventListener("keydown", _onKey);
       this._keyHandlers = Object.create(keyHandlers);
-      const mutation = new MutationObserver(() => this._docWasChanged());
+      const mutation = new MutationObserver((r) => {
+        this._handleMutationChanges(r);
+      });
       mutation.observe(root, {
         childList: true,
-        attributes: this._config.watchRootAttributes,
+        attributes: true,
         characterData: true,
         subtree: true
       });
@@ -2228,7 +2231,7 @@
         blockTag: "DIV",
         blockAttributes: null,
         tagAttributes: {},
-        watchRootAttributes: true,
+        ignoreRootAttributes: false,
         classNames: {
           color: "color",
           fontFamily: "font",
@@ -2569,7 +2572,7 @@
       if (!this._isFocused) {
         this._enableRestoreSelection();
       } else {
-        const selection = window.getSelection();
+        const selection = (document["getSelection"] ? document : window).getSelection();
         if (selection) {
           if ("setBaseAndExtent" in Selection.prototype) {
             selection.setBaseAndExtent(
@@ -2685,21 +2688,42 @@
       return path;
     }
     // --- History
+    /**
+     * This method is used to modify the document; changes will not be considered state changes.
+     * To modify the document asynchronously, use observe and unobserve.
+     * This method also uses those methods.
+     */
     modifyDocument(modificationFn) {
+      this.unobserve();
+      modificationFn();
+      this.observe();
+      return this;
+    }
+    /**
+     * Disable observing the changes of the document
+    */
+    unobserve() {
       const mutation = this._mutation;
       if (mutation) {
-        if (mutation.takeRecords().length) {
-          this._docWasChanged();
+        const recs = mutation.takeRecords();
+        if (recs.length) {
+          this._handleMutationChanges(recs);
         }
         mutation.disconnect();
       }
       this._ignoreAllChanges = true;
-      modificationFn();
+      return this;
+    }
+    /**
+     * enable the observe process for the document.
+    */
+    observe() {
+      const mutation = this._mutation;
       this._ignoreAllChanges = false;
       if (mutation) {
         mutation.observe(this._root, {
           childList: true,
-          attributes: this._config.watchRootAttributes,
+          attributes: true,
           characterData: true,
           subtree: true
         });
@@ -2710,7 +2734,7 @@
     _docWasChanged() {
       resetNodeCategoryCache();
       this._mayHaveZWS = true;
-      if (this._ignoreAllChanges) {
+      if (!this.getRoot().isContentEditable || this._ignoreAllChanges) {
         return;
       }
       if (this._ignoreChange) {
@@ -2725,6 +2749,11 @@
         });
       }
       this.fireEvent("input");
+    }
+    _handleMutationChanges(records) {
+      this.fireEvent("mutation", { records });
+      if (!records.length || !this._config.ignoreRootAttributes || records.some((r) => r.type !== "attributes" && r.target !== this.getRoot()))
+        this._docWasChanged();
     }
     /**
      * Leaves bookmark.
@@ -2869,10 +2898,6 @@
       }
       root.appendChild(frag);
       this.clearUndoStack();
-      const range = this._getRangeAndRemoveBookmark() || createRange(root.firstElementChild || root, 0);
-      this.saveUndoState(range);
-      this.setSelection(range);
-      this._updatePath(range, true);
       return this;
     }
     /**
@@ -2883,6 +2908,15 @@
       this._undoStack.length = 0;
       this._undoStackLength = 0;
       this._isInUndoState = false;
+      const root = this.getRoot();
+      const range = this._getRangeAndRemoveBookmark() || createRange(root.firstElementChild || root, 0);
+      this.saveUndoState(range);
+      this.setSelection(range);
+      this._updatePath(range, true);
+      this.fireEvent("undoStateChange", {
+        canUndo: false,
+        canRedo: false
+      });
     }
     /**
      * Insert HTML at the cursor location. If the selection is not collapsed
@@ -3645,6 +3679,12 @@
       this._updatePath(range, true);
       return this;
     }
+    /**
+     * Used to do some operations on the selected blocks
+     * @param fn function to call on every blocks in selection. To stop next iteration return any truthy value
+     * @param mutates does your operations mutates/changes anything
+     * @param range optional custom range to modify in that range.
+    */
     forEachBlock(fn, mutates, range) {
       if (!range) {
         range = this.getSelection();
