@@ -39,7 +39,7 @@ function getKeyHandlers() {
         let modifiers = '';
         const range: Range = this.getSelection();
 
-        if (event.defaultPrevented) {
+        if (event.defaultPrevented || !this.getRoot().isContentEditable) {
             return;
         }
 
