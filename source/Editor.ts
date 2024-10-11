@@ -637,7 +637,7 @@ class Squire {
         if (!this._isFocused) {
             this._enableRestoreSelection();
         } else {
-            const selection = (document['getSelection'] ? document : window).getSelection();
+            const selection = ('getSelection' in document ? document : window).getSelection();
             if (selection) {
                 if ('setBaseAndExtent' in Selection.prototype) {
                     selection.setBaseAndExtent(
@@ -857,8 +857,9 @@ class Squire {
     _handleMutationChanges(records: MutationRecord[]): void {
         this.fireEvent("mutation", { records })
 
-        if (!records.length || !this._config.ignoreRootAttributes || records.some(r => r.type !== "attributes" && r.target !== this.getRoot()))
+        if (!records.length || !this._config.ignoreRootAttributes || records.some(r => r.type !== "attributes" && r.target !== this.getRoot())) {
             this._docWasChanged()
+        }
     }
 
     /**
