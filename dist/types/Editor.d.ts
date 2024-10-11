@@ -41,7 +41,7 @@ declare class Squire {
     _lastAnchorNode: Node | null;
     _lastFocusNode: Node | null;
     _path: string;
-    _events: Map<(keyof HTMLElementEventMap) | CustomEvents | Events | string, Array<EventHandler>>;
+    _events: Map<keyof HTMLElementEventMap | CustomEvents | Events | string, Array<EventHandler>>;
     _undoIndex: number;
     _undoStack: Array<string>;
     _undoStackLength: number;
@@ -57,15 +57,15 @@ declare class Squire {
     setKeyHandler(key: string, fn: KeyHandlerFunction): this;
     _beforeInput(event: InputEvent): void;
     handleEvent(event: Event): void;
-    fireEvent(type: (keyof HTMLElementEventMap) | CustomEvents | Events | string, detail?: Event | object): Squire;
+    fireEvent(type: keyof HTMLElementEventMap | CustomEvents | Events | string, detail?: Event | object): Squire;
     /**
      * Subscribing to these events won't automatically add a listener to the
      * document node, since these events are fired in a custom manner by the
      * editor code.
      */
     customEvents: Set<string>;
-    addEventListener<K extends (keyof HTMLElementEventMap) | CustomEvents | Events | string>(type: K, fn: EventHandler): Squire;
-    removeEventListener<K extends (keyof HTMLElementEventMap) | CustomEvents | Events | string>(type: K, fn?: EventHandler): Squire;
+    addEventListener<K extends keyof HTMLElementEventMap | CustomEvents | Events | string>(type: K, fn: EventHandler): Squire;
+    removeEventListener<K extends keyof HTMLElementEventMap | CustomEvents | Events | string>(type: K, fn?: EventHandler): Squire;
     focus(): Squire;
     blur(): Squire;
     _enableRestoreSelection(): void;
@@ -94,11 +94,11 @@ declare class Squire {
     modifyDocument(modificationFn: () => void): Squire;
     /**
      * Disable observing the changes of the document
-    */
+     */
     unobserve(): Squire;
     /**
      * enable the observe process for the document.
-    */
+     */
     observe(): Squire;
     _docWasChanged(): void;
     _handleMutationChanges(records: MutationRecord[]): void;
@@ -116,7 +116,7 @@ declare class Squire {
     setHTML(html: string): Squire;
     /**
      * Reset the undo stack
-    */
+     */
     clearUndoStack(): void;
     /**
      * Insert HTML at the cursor location. If the selection is not collapsed
@@ -176,10 +176,10 @@ declare class Squire {
      * @param fn function to call on every blocks in selection. To stop next iteration return any truthy value
      * @param mutates does your operations mutates/changes anything
      * @param range optional custom range to modify in that range.
-    */
+     */
     forEachBlock(fn: (el: HTMLElement) => any, mutates: boolean, range?: Range): Squire;
     modifyBlocks(modify: (x: DocumentFragment) => Node, range?: Range): Squire;
-    setTextAlignment(alignment: "left" | "right" | "center" | "justify" | string): Squire;
+    setTextAlignment(alignment: 'left' | 'right' | 'center' | 'justify' | string): Squire;
     setTextDirection(direction: string | null): Squire;
     _getListSelection(range: Range, root: Element): [Node, Node | null, Node | null] | null;
     increaseListLevel(range?: Range): Squire;
@@ -191,6 +191,7 @@ declare class Squire {
     increaseQuoteLevel(range?: Range): Squire;
     decreaseQuoteLevel(range?: Range): Squire;
     removeQuote(range?: Range): Squire;
+    replaceWithBlankLine(range?: Range): Squire;
     code(): Squire;
     removeCode(): Squire;
     toggleCode(): Squire;

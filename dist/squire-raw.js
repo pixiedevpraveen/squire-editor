@@ -457,13 +457,14 @@
           fixer = document.createTextNode("");
         }
       }
-    } else if (node instanceof Element && !node.querySelector("BR")) {
+    } else if ((node instanceof Element || node instanceof DocumentFragment) && !node.querySelector("BR")) {
       fixer = createElement("BR");
       let parent = node;
       let child;
       while ((child = parent.lastElementChild) && !isInline(child)) {
         parent = child;
       }
+      node = parent;
     }
     if (fixer) {
       try {
@@ -1136,11 +1137,12 @@
       frag.appendChild(node);
       node = next;
     }
-    if (startContainer instanceof Text && endContainer instanceof Text) {
-      startContainer.appendData(endContainer.data);
+    node = endContainer && endContainer.previousSibling;
+    if (node && node instanceof Text && endContainer instanceof Text) {
+      endOffset = node.length;
+      node.appendData(endContainer.data);
       detach(endContainer);
-      endContainer = startContainer;
-      endOffset = startOffset;
+      endContainer = node;
     }
     range.setStart(startContainer, startOffset);
     if (endContainer) {
@@ -1318,6 +1320,7 @@
     }
     if (blockContentsAfterSplit && block) {
       const tempRange = range.cloneRange();
+      fixCursor(blockContentsAfterSplit);
       mergeWithBlock(block, blockContentsAfterSplit, tempRange, root);
       range.setEnd(tempRange.endContainer, tempRange.endOffset);
     }
@@ -1422,6 +1425,7 @@
       text = text.replace(/\r?\n/g, "\r\n");
     }
     if (!plainTextOnly && html && text !== html) {
+      html = "<!-- squire -->" + html;
       clipboardData.setData("text/html", html);
     }
     clipboardData.setData("text/plain", text);
@@ -1857,7 +1861,6 @@
   // source/keyboard/Space.ts
   var Space = (self, event, range) => {
     var _a;
-    const { cantFocusEmptyTextNodes } = getConstants();
     let node;
     const root = self._root;
     self._recordUndoState(range);
@@ -1873,10 +1876,13 @@
         const text = (_a = block.textContent) == null ? void 0 : _a.trimEnd().replace(ZWS, "");
         if (text === "*" || text === "1.") {
           event.preventDefault();
+          self.insertPlainText(" ", false);
+          self._docWasChanged();
+          self.saveUndoState(range);
           const walker = new TreeIterator(block, SHOW_TEXT);
           let textNode;
           while (textNode = walker.nextNode()) {
-            textNode.data = cantFocusEmptyTextNodes ? ZWS : "";
+            detach(textNode);
           }
           if (text === "*") {
             self.makeUnorderedList();
@@ -1909,42 +1915,17 @@
   };
 
   // source/keyboard/KeyHandlers.ts
-  var keys = {
-    8: "Backspace",
-    9: "Tab",
-    13: "Enter",
-    27: "Escape",
-    32: "Space",
-    33: "PageUp",
-    34: "PageDown",
-    37: "ArrowLeft",
-    38: "ArrowUp",
-    39: "ArrowRight",
-    40: "ArrowDown",
-    46: "Delete",
-    191: "/",
-    219: "[",
-    220: "\\",
-    221: "]"
-  };
   function getKeyHandlers() {
     const { isWin, ctrlKey, supportsInputEvents, isIOS, isMac } = getConstants();
     const _onKey = function(event) {
-      const code = event.keyCode;
-      let key = keys[code];
-      let modifiers = "";
-      const range = this.getSelection();
-      if (event.defaultPrevented || !this.getRoot().isContentEditable) {
+      if (event.defaultPrevented || event.isComposing || !this.getRoot().isContentEditable) {
         return;
       }
-      if (!key) {
-        key = String.fromCharCode(code).toLowerCase();
-        if (!/^[A-Za-z0-9]$/.test(key)) {
-          key = "";
-        }
-      }
-      if (111 < code && code < 124) {
-        key = "F" + (code - 111);
+      let key = event.key;
+      let modifiers = "";
+      const code = event.code;
+      if (/^Digit\d$/.test(code)) {
+        key = code.slice(-1);
       }
       if (key !== "Backspace" && key !== "Delete") {
         if (event.altKey) {
@@ -1964,11 +1945,10 @@
         modifiers += "Shift-";
       }
       key = modifiers + key;
+      const range = this.getSelection();
       if (this._keyHandlers[key]) {
         this._keyHandlers[key](this, event, range);
-      } else if (!range.collapsed && // !event.isComposing stops us from blatting Kana-Kanji conversion in
-      // Safari
-      !event.isComposing && !event.ctrlKey && !event.metaKey && (event.key || key).length === 1) {
+      } else if (!range.collapsed && !event.ctrlKey && !event.metaKey && key.length === 1) {
         this.saveUndoState(range);
         deleteContentsOfRange(range, this._root);
         this._ensureBottomLine();
@@ -1981,7 +1961,7 @@
       "Delete": Delete,
       "Tab": Tab,
       "Shift-Tab": ShiftTab,
-      "Space": Space,
+      " ": Space,
       "ArrowLeft"(self) {
         self._removeZWS();
       },
@@ -2082,7 +2062,10 @@
       event.preventDefault();
       self.undo();
     };
-    keyHandlers[ctrlKey + "y"] = keyHandlers[ctrlKey + "Shift-z"] = (self, event) => {
+    keyHandlers[ctrlKey + "y"] = // Depending on platform, the Shift may cause the key to come through as
+    // upper case, but sometimes not. Just add both as shortcuts — the browser
+    // will only ever fire one or the other.
+    keyHandlers[ctrlKey + "Shift-z"] = keyHandlers[ctrlKey + "Shift-Z"] = (self, event) => {
       event.preventDefault();
       self.redo();
     };
@@ -2187,6 +2170,7 @@
       this.addEventListener("mousedown", this._disableRestoreSelection);
       this.addEventListener("touchstart", this._disableRestoreSelection);
       this.addEventListener("focus", this._restoreSelection);
+      this.addEventListener("blur", this._removeZWS);
       this._isShiftDown = false;
       this.addEventListener("cut", _onCut);
       this.addEventListener("copy", _onCopy);
@@ -2271,13 +2255,7 @@
       return this;
     }
     _beforeInput(event) {
-      const { isAndroid } = getConstants();
       switch (event.inputType) {
-        case "insertText":
-          if (isAndroid && event.data && event.data.includes("\n")) {
-            event.preventDefault();
-          }
-          break;
         case "insertLineBreak":
           event.preventDefault();
           this.splitBlock(true);
@@ -2572,7 +2550,7 @@
       if (!this._isFocused) {
         this._enableRestoreSelection();
       } else {
-        const selection = (document["getSelection"] ? document : window).getSelection();
+        const selection = ("getSelection" in document ? document : window).getSelection();
         if (selection) {
           if ("setBaseAndExtent" in Selection.prototype) {
             selection.setBaseAndExtent(
@@ -2636,7 +2614,7 @@
         this._lastAnchorNode = anchor;
         this._lastFocusNode = focus;
         newPath = anchor && focus ? anchor === focus ? this._getPath(focus) : "(selection)" : "";
-        if (this._path !== newPath) {
+        if (this._path !== newPath || anchor !== focus) {
           this._path = newPath;
           this.fireEvent("pathChange", {
             path: newPath
@@ -2701,7 +2679,7 @@
     }
     /**
      * Disable observing the changes of the document
-    */
+     */
     unobserve() {
       const mutation = this._mutation;
       if (mutation) {
@@ -2716,7 +2694,7 @@
     }
     /**
      * enable the observe process for the document.
-    */
+     */
     observe() {
       const mutation = this._mutation;
       this._ignoreAllChanges = false;
@@ -2752,29 +2730,36 @@
     }
     _handleMutationChanges(records) {
       this.fireEvent("mutation", { records });
-      if (!records.length || !this._config.ignoreRootAttributes || records.some((r) => r.type !== "attributes" && r.target !== this.getRoot()))
+      if (!records.length || !this._config.ignoreRootAttributes || records.some(
+        (r) => r.type !== "attributes" && r.target !== this.getRoot()
+      )) {
         this._docWasChanged();
+      }
     }
     /**
      * Leaves bookmark.
      */
     _recordUndoState(range, replace) {
-      if (!this._isInUndoState || replace) {
-        let undoIndex = this._undoIndex;
+      const isInUndoState = this._isInUndoState;
+      if (!isInUndoState || replace) {
+        let undoIndex = this._undoIndex + 1;
         const undoStack = this._undoStack;
         const undoConfig = this._config.undo;
         const undoThreshold = undoConfig.documentSizeThreshold;
         const undoLimit = undoConfig.undoLimit;
-        if (!replace) {
-          undoIndex += 1;
-        }
         if (undoIndex < this._undoStackLength) {
           undoStack.length = this._undoStackLength = undoIndex;
         }
         if (range) {
           this._saveRangeToBookmark(range);
         }
+        if (isInUndoState) {
+          return this;
+        }
         const html = this._getRawHTML();
+        if (replace) {
+          undoIndex -= 1;
+        }
         if (undoThreshold > -1 && html.length * 2 > undoThreshold) {
           if (undoLimit > -1 && undoIndex > undoLimit) {
             undoStack.splice(0, undoIndex - undoLimit);
@@ -2902,7 +2887,7 @@
     }
     /**
      * Reset the undo stack
-    */
+     */
     clearUndoStack() {
       this._undoIndex = -1;
       this._undoStack.length = 0;
@@ -2944,7 +2929,9 @@
         let doInsert = true;
         if (isPaste) {
           const event = new CustomEvent("willPaste", {
+            cancelable: true,
             detail: {
+              html,
               fragment: frag
             }
           });
@@ -3044,6 +3031,7 @@
         let doInsert = true;
         if (isPaste) {
           const event = new CustomEvent("willPaste", {
+            cancelable: true,
             detail: {
               text: plainText
             }
@@ -3098,6 +3086,7 @@
       if (!range) {
         range = this.getSelection();
       }
+      moveRangeBoundariesDownTree(range);
       let seenAttributes = 0;
       let element = range.commonAncestorContainer;
       if (range.collapsed || element instanceof Text) {
@@ -3621,7 +3610,7 @@
           this.decreaseListLevel(range);
           return this;
         } else if (getNearest(block, root, "BLOCKQUOTE")) {
-          this.removeQuote(range);
+          this.replaceWithBlankLine(range);
           return this;
         }
       }
@@ -3684,7 +3673,7 @@
      * @param fn function to call on every blocks in selection. To stop next iteration return any truthy value
      * @param mutates does your operations mutates/changes anything
      * @param range optional custom range to modify in that range.
-    */
+     */
     forEachBlock(fn, mutates, range) {
       if (!range) {
         range = this.getSelection();
@@ -3748,7 +3737,9 @@
     // ---
     setTextAlignment(alignment) {
       const { align } = this._config.classNames;
-      const assign = ["left", "right", "center", "justify"].includes(alignment);
+      const assign = ["left", "right", "center", "justify"].includes(
+        alignment
+      );
       this.forEachBlock((block) => {
         const className = block.className.split(/\s+/).filter((klass) => {
           return !!klass && !(klass == null ? void 0 : klass.startsWith(align));
@@ -3980,6 +3971,17 @@
       return this.focus();
     }
     removeQuote(range) {
+      this.modifyBlocks((frag) => {
+        Array.from(frag.querySelectorAll("blockquote")).forEach(
+          (el) => {
+            replaceWith(el, empty(el));
+          }
+        );
+        return frag;
+      }, range);
+      return this.focus();
+    }
+    replaceWithBlankLine(range) {
       this.modifyBlocks(
         () => this.createDefaultBlock([
           createElement("INPUT", {

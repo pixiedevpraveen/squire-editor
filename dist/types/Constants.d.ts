@@ -19,5 +19,5 @@ declare function getConstants(): {
     cantFocusEmptyTextNodes: boolean;
     supportsInputEvents: boolean;
 };
-export { DOCUMENT_POSITION_PRECEDING, ELEMENT_NODE, TEXT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE, notWS, ZWS, getConstants };
+export { DOCUMENT_POSITION_PRECEDING, ELEMENT_NODE, TEXT_NODE, DOCUMENT_NODE, DOCUMENT_FRAGMENT_NODE, notWS, ZWS, getConstants, };
 //# sourceMappingURL=Constants.d.ts.map
