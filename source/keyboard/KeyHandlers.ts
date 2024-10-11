@@ -11,53 +11,28 @@ import { moveRangeBoundariesDownTree } from '../range/Boundaries';
 
 // ---
 
-const keys: Record<string, string> = {
-    8: 'Backspace',
-    9: 'Tab',
-    13: 'Enter',
-    27: 'Escape',
-    32: 'Space',
-    33: 'PageUp',
-    34: 'PageDown',
-    37: 'ArrowLeft',
-    38: 'ArrowUp',
-    39: 'ArrowRight',
-    40: 'ArrowDown',
-    46: 'Delete',
-    191: '/',
-    219: '[',
-    220: '\\',
-    221: ']',
-};
 function getKeyHandlers() {
     const { isWin, ctrlKey, supportsInputEvents, isIOS, isMac } = getConstants()
 
     // Ref: http://unixpapa.com/js/key.html
     const _onKey = function (this: Squire, event: KeyboardEvent): void {
-        const code = event.keyCode;
-        let key = keys[code];
-        let modifiers = '';
-        const range: Range = this.getSelection();
 
-        if (event.defaultPrevented || !this.getRoot().isContentEditable) {
+        // Ignore key events where event.isComposing, to stop us from blatting
+        // Kana-Kanji conversion
+        if (event.defaultPrevented || event.isComposing || !this.getRoot().isContentEditable) {
             return;
-        }
-
-        if (!key) {
-            key = String.fromCharCode(code).toLowerCase();
-            // Only reliable for letters and numbers
-            if (!/^[A-Za-z0-9]$/.test(key)) {
-                key = '';
-            }
-        }
-
-        // Function keys
-        if (111 < code && code < 124) {
-            key = 'F' + (code - 111);
         }
 
         // We need to apply the Backspace/delete handlers regardless of
         // control key modifiers.
+        let key = event.key;
+        let modifiers = '';
+        const code = event.code;
+        // If pressing a number key + Shift, make sure we handle it as the number
+        // key and not whatever different character the shift might turn it into.
+        if (/^Digit\d$/.test(code)) {
+            key = code.slice(-1);
+        }
         if (key !== 'Backspace' && key !== 'Delete') {
             if (event.altKey) {
                 modifiers += 'Alt-';
@@ -77,19 +52,16 @@ function getKeyHandlers() {
         if (isWin && event.shiftKey && key === 'Delete') {
             modifiers += 'Shift-';
         }
-
         key = modifiers + key;
 
+        const range: Range = this.getSelection()
         if (this._keyHandlers[key]) {
             this._keyHandlers[key](this, event, range);
         } else if (
             !range.collapsed &&
-            // !event.isComposing stops us from blatting Kana-Kanji conversion in
-            // Safari
-            !event.isComposing &&
             !event.ctrlKey &&
             !event.metaKey &&
-            (event.key || key).length === 1
+            key.length === 1
         ) {
             // Record undo checkpoint.
             this.saveUndoState(range);
@@ -110,7 +82,7 @@ function getKeyHandlers() {
         'Delete': Delete,
         'Tab': Tab,
         'Shift-Tab': ShiftTab,
-        'Space': Space,
+        ' ': Space,
         'ArrowLeft'(self: Squire): void {
             self._removeZWS();
         },
@@ -238,13 +210,16 @@ function getKeyHandlers() {
         event.preventDefault();
         self.undo();
     };
-    keyHandlers[ctrlKey + 'y'] = keyHandlers[ctrlKey + 'Shift-z'] = (
-        self: Squire,
-        event: KeyboardEvent,
-    ): void => {
-        event.preventDefault();
-        self.redo();
-    };
+    keyHandlers[ctrlKey + 'y'] =
+        // Depending on platform, the Shift may cause the key to come through as
+        // upper case, but sometimes not. Just add both as shortcuts — the browser
+        // will only ever fire one or the other.
+        keyHandlers[ctrlKey + 'Shift-z'] =
+        keyHandlers[ctrlKey + 'Shift-Z'] =
+        (self: Squire, event: KeyboardEvent): void => {
+            event.preventDefault();
+            self.redo();
+        };
     return { _onKey, keyHandlers }
 }
 

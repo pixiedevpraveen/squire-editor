@@ -165,6 +165,9 @@ class Squire {
         this.addEventListener('touchstart', this._disableRestoreSelection);
         this.addEventListener('focus', this._restoreSelection);
 
+        // On blur, cleanup any ZWS/empty inlines
+        this.addEventListener('blur', this._removeZWS);
+
         // Clipboard support
         this._isShiftDown = false;
         this.addEventListener('cut', _onCut as (e: Event) => void);
@@ -267,21 +270,7 @@ class Squire {
     }
 
     _beforeInput(event: InputEvent): void {
-        const { isAndroid } = getConstants()
         switch (event.inputType) {
-            case 'insertText':
-                // Generally we let the browser handle text insertion, as it
-                // does so fine. However, the Samsung keyboard on Android with
-                // the Grammerly extension goes batshit crazy for some reason
-                // and will try to disastrously rewrite the whole data, without
-                // the user even doing anything (it can happen on first load
-                // before the user types anything). Fortunately we can detect
-                // this by looking for a new line in the data and if we see it,
-                // stop it by preventing default.
-                if (isAndroid && event.data && event.data.includes('\n')) {
-                    event.preventDefault();
-                }
-                break;
             case 'insertLineBreak':
                 event.preventDefault();
                 this.splitBlock(true);
@@ -734,7 +723,7 @@ class Squire {
                         ? this._getPath(focus)
                         : '(selection)'
                     : '';
-            if (this._path !== newPath) {
+            if (this._path !== newPath || anchor !== focus) {
                 this._path = newPath;
                 this.fireEvent('pathChange', {
                     path: newPath,
@@ -876,33 +865,39 @@ class Squire {
      * Leaves bookmark.
      */
     _recordUndoState(range: Range, replace?: boolean): Squire {
-        // Don't record if we're already in an undo state
-        if (!this._isInUndoState || replace) {
+        const isInUndoState = this._isInUndoState;
+        if (!isInUndoState || replace) {
             // Advance pointer to new position
-            let undoIndex = this._undoIndex;
+            let undoIndex = this._undoIndex + 1;
             const undoStack = this._undoStack;
             const undoConfig = this._config.undo;
             const undoThreshold = undoConfig.documentSizeThreshold;
             const undoLimit = undoConfig.undoLimit;
-
-            if (!replace) {
-                undoIndex += 1;
-            }
 
             // Truncate stack if longer (i.e. if has been previously undone)
             if (undoIndex < this._undoStackLength) {
                 undoStack.length = this._undoStackLength = undoIndex;
             }
 
-            // Get data
+            // Add bookmark
             if (range) {
                 this._saveRangeToBookmark(range);
             }
+
+            // don't record if we're already in an undo state
+            if (isInUndoState) {
+                return this;
+            }
+
+            // Get data
             const html = this._getRawHTML();
 
             // If this document is above the configured size threshold,
             // limit the number of saved undo states.
             // Threshold is in bytes, JS uses 2 bytes per character
+            if (replace) {
+                undoIndex -= 1;
+            }
             if (undoThreshold > -1 && html.length * 2 > undoThreshold) {
                 if (undoLimit > -1 && undoIndex > undoLimit) {
                     undoStack.splice(0, undoIndex - undoLimit);
@@ -1120,7 +1115,9 @@ class Squire {
             let doInsert = true;
             if (isPaste) {
                 const event = new CustomEvent('willPaste', {
+                    cancelable: true,
                     detail: {
+                        html,
                         fragment: frag,
                     },
                 });
@@ -1250,6 +1247,7 @@ class Squire {
             let doInsert = true;
             if (isPaste) {
                 const event = new CustomEvent('willPaste', {
+                    cancelable: true,
                     detail: {
                         text: plainText,
                     },
@@ -1314,6 +1312,7 @@ class Squire {
         if (!range) {
             range = this.getSelection();
         }
+        moveRangeBoundariesDownTree(range);
 
         let seenAttributes = 0;
         let element: Node | null = range.commonAncestorContainer;
@@ -2119,7 +2118,7 @@ class Squire {
                 return this;
                 // Break blockquote
             } else if (getNearest(block, root, 'BLOCKQUOTE')) {
-                this.removeQuote(range);
+                this.replaceWithBlankLine(range);
                 return this;
             }
         }
@@ -2588,6 +2587,18 @@ class Squire {
     }
 
     removeQuote(range?: Range): Squire {
+        this.modifyBlocks((frag) => {
+            Array.from(frag.querySelectorAll('blockquote')).forEach(
+                (el: Node) => {
+                    replaceWith(el, empty(el));
+                },
+            );
+            return frag;
+        }, range);
+        return this.focus();
+    }
+
+    replaceWithBlankLine(range?: Range): Squire {
         this.modifyBlocks(
             (/* frag */) =>
                 this.createDefaultBlock([

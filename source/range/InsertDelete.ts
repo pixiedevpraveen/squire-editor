@@ -134,11 +134,12 @@ const extractContentsOfRange = (
     }
 
     // Merge text nodes if adjacent
-    if (startContainer instanceof Text && endContainer instanceof Text) {
-        startContainer.appendData(endContainer.data);
+    node = endContainer && endContainer.previousSibling;
+    if (node && node instanceof Text && endContainer instanceof Text) {
+        endOffset = node.length;
+        node.appendData(endContainer.data);
         detach(endContainer);
-        endContainer = startContainer;
-        endOffset = startOffset;
+        endContainer = node;
     }
 
     range.setStart(startContainer, startOffset);
@@ -425,6 +426,7 @@ const insertTreeFragmentIntoRange = (
     // Insert inline content saved from before.
     if (blockContentsAfterSplit && block) {
         const tempRange = range.cloneRange();
+        fixCursor(blockContentsAfterSplit);
         mergeWithBlock(block, blockContentsAfterSplit, tempRange, root);
         range.setEnd(tempRange.endContainer, tempRange.endOffset);
     }

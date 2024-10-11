@@ -38,18 +38,22 @@ const fixCursor = (node: Node): Node => {
                 fixer = document.createTextNode('');
             }
         }
-    } else if (node instanceof Element && !node.querySelector('BR')) {
+    } else if (
+        (node instanceof Element || node instanceof DocumentFragment) &&
+        !node.querySelector('BR')
+    ) {
         fixer = createElement('BR');
-        let parent: Element = node;
+        let parent: Element | DocumentFragment = node;
         let child: Element | null;
         while ((child = parent.lastElementChild) && !isInline(child)) {
             parent = child;
         }
+        node = parent;
     }
     if (fixer) {
         try {
             node.appendChild(fixer);
-        } catch (error) {}
+        } catch (error) { }
     }
 
     return node;
