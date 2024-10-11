@@ -14,7 +14,6 @@ import { ZWS } from '../Constants';
 // ---
 
 const Space = (self: Squire, event: KeyboardEvent, range: Range): void => {
-
     let node: Node | null;
     const root = self._root;
     self._recordUndoState(range);
@@ -38,7 +37,7 @@ const Space = (self: Squire, event: KeyboardEvent, range: Range): void => {
                 const walker = new TreeIterator<Text>(block, SHOW_TEXT);
                 let textNode: Text | null;
                 while ((textNode = walker.nextNode())) {
-                    detach(textNode)
+                    detach(textNode);
                 }
                 if (text === '*') {
                     self.makeUnorderedList();

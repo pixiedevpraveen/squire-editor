@@ -12,14 +12,18 @@ import { moveRangeBoundariesDownTree } from '../range/Boundaries';
 // ---
 
 function getKeyHandlers() {
-    const { isWin, ctrlKey, supportsInputEvents, isIOS, isMac } = getConstants()
+    const { isWin, ctrlKey, supportsInputEvents, isIOS, isMac } =
+        getConstants();
 
     // Ref: http://unixpapa.com/js/key.html
     const _onKey = function (this: Squire, event: KeyboardEvent): void {
-
         // Ignore key events where event.isComposing, to stop us from blatting
         // Kana-Kanji conversion
-        if (event.defaultPrevented || event.isComposing || !this.getRoot().isContentEditable) {
+        if (
+            event.defaultPrevented ||
+            event.isComposing ||
+            !this.getRoot().isContentEditable
+        ) {
             return;
         }
 
@@ -54,7 +58,7 @@ function getKeyHandlers() {
         }
         key = modifiers + key;
 
-        const range: Range = this.getSelection()
+        const range: Range = this.getSelection();
         if (this._keyHandlers[key]) {
             this._keyHandlers[key](this, event, range);
         } else if (
@@ -75,7 +79,11 @@ function getKeyHandlers() {
 
     // ---
 
-    type KeyHandler = (self: Squire, event: KeyboardEvent, range: Range) => void;
+    type KeyHandler = (
+        self: Squire,
+        event: KeyboardEvent,
+        range: Range,
+    ) => void;
 
     const keyHandlers: Record<string, KeyHandler> = {
         'Backspace': Backspace,
@@ -216,11 +224,11 @@ function getKeyHandlers() {
         // will only ever fire one or the other.
         keyHandlers[ctrlKey + 'Shift-z'] =
         keyHandlers[ctrlKey + 'Shift-Z'] =
-        (self: Squire, event: KeyboardEvent): void => {
-            event.preventDefault();
-            self.redo();
-        };
-    return { _onKey, keyHandlers }
+            (self: Squire, event: KeyboardEvent): void => {
+                event.preventDefault();
+                self.redo();
+            };
+    return { _onKey, keyHandlers };
 }
 
 export { getKeyHandlers };

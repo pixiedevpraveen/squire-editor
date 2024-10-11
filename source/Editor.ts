@@ -64,9 +64,28 @@ declare const DOMPurify: any;
 
 // ---
 
-type CustomEvents = 'pathChange' | 'select' | 'input' | 'pasteImage' | 'undoStateChange' | 'mutation'
+type CustomEvents =
+    | 'pathChange'
+    | 'select'
+    | 'input'
+    | 'pasteImage'
+    | 'undoStateChange'
+    | 'mutation';
 
-type Events = 'selectionchange' | 'blur' | 'mousedown' | 'touchstart' | 'focus' | 'cut' | 'copy' | 'paste' | 'drop' | 'keydown' | 'keyup' | 'keydown' | 'beforeinput'
+type Events =
+    | 'selectionchange'
+    | 'blur'
+    | 'mousedown'
+    | 'touchstart'
+    | 'focus'
+    | 'cut'
+    | 'copy'
+    | 'paste'
+    | 'drop'
+    | 'keydown'
+    | 'keyup'
+    | 'keydown'
+    | 'beforeinput';
 
 // TODO type with respect to the event
 // type EventHandler<T> = { handleEvent: (e: Event) => void } | ((e: Event) => void);
@@ -117,7 +136,10 @@ class Squire {
     _lastFocusNode: Node | null;
     _path: string;
 
-    _events: Map<(keyof HTMLElementEventMap) | CustomEvents | Events | string, Array<EventHandler>>;
+    _events: Map<
+        keyof HTMLElementEventMap | CustomEvents | Events | string,
+        Array<EventHandler>
+    >;
 
     _undoIndex: number;
     _undoStack: Array<string>;
@@ -180,12 +202,14 @@ class Squire {
         );
         this.addEventListener('keyup', _monitorShiftKey as (e: Event) => void);
 
-        const { _onKey, keyHandlers } = getKeyHandlers()
+        const { _onKey, keyHandlers } = getKeyHandlers();
         // Keyboard support
         this.addEventListener('keydown', _onKey as (e: Event) => void);
         this._keyHandlers = Object.create(keyHandlers);
 
-        const mutation = new MutationObserver((r) => { this._handleMutationChanges(r) });
+        const mutation = new MutationObserver((r) => {
+            this._handleMutationChanges(r);
+        });
         mutation.observe(root, {
             childList: true,
             attributes: true,
@@ -365,7 +389,10 @@ class Squire {
         this.fireEvent(event.type, event);
     }
 
-    fireEvent(type: (keyof HTMLElementEventMap) | CustomEvents | Events | string, detail?: Event | object): Squire {
+    fireEvent(
+        type: keyof HTMLElementEventMap | CustomEvents | Events | string,
+        detail?: Event | object,
+    ): Squire {
         let handlers = this._events.get(type);
         // UI code, especially modal views, may be monitoring for focus events
         // and immediately removing focus. In certain conditions, this can
@@ -391,8 +418,8 @@ class Squire {
                 detail instanceof Event
                     ? detail
                     : new CustomEvent(type, {
-                        detail,
-                    });
+                          detail,
+                      });
             // Clone handlers array, so any handlers added/removed do not
             // affect it.
             handlers = handlers.slice();
@@ -425,7 +452,12 @@ class Squire {
         'mutation',
     ]);
 
-    addEventListener<K extends (keyof HTMLElementEventMap) | CustomEvents | Events | string>(type: K, fn: /* K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K]: */ EventHandler): Squire {
+    addEventListener<
+        K extends keyof HTMLElementEventMap | CustomEvents | Events | string,
+    >(
+        type: K,
+        fn: /* K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K]: */ EventHandler,
+    ): Squire {
         let handlers = this._events.get(type);
         let target: Document | HTMLElement = this._root;
         if (!handlers) {
@@ -442,7 +474,12 @@ class Squire {
         return this;
     }
 
-    removeEventListener<K extends (keyof HTMLElementEventMap) | CustomEvents | Events | string>(type: K, fn?: /* K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K]: */ EventHandler): Squire {
+    removeEventListener<
+        K extends keyof HTMLElementEventMap | CustomEvents | Events | string,
+    >(
+        type: K,
+        fn?: /* K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K]: */ EventHandler,
+    ): Squire {
         const handlers = this._events.get(type);
         let target: Document | HTMLElement = this._root;
         if (handlers) {
@@ -637,7 +674,9 @@ class Squire {
         if (!this._isFocused) {
             this._enableRestoreSelection();
         } else {
-            const selection = ('getSelection' in document ? document : window).getSelection();
+            const selection = (
+                'getSelection' in document ? document : window
+            ).getSelection();
             if (selection) {
                 if ('setBaseAndExtent' in Selection.prototype) {
                     selection.setBaseAndExtent(
@@ -791,19 +830,19 @@ class Squire {
      * This method also uses those methods.
      */
     modifyDocument(modificationFn: () => void): Squire {
-        this.unobserve()
+        this.unobserve();
         modificationFn();
-        this.observe()
+        this.observe();
         return this;
     }
 
     /**
      * Disable observing the changes of the document
-    */
+     */
     unobserve(): Squire {
         const mutation = this._mutation;
         if (mutation) {
-            const recs = mutation.takeRecords()
+            const recs = mutation.takeRecords();
             if (recs.length) {
                 this._handleMutationChanges(recs);
             }
@@ -811,12 +850,12 @@ class Squire {
         }
 
         this._ignoreAllChanges = true;
-        return this
+        return this;
     }
 
     /**
      * enable the observe process for the document.
-    */
+     */
     observe(): Squire {
         const mutation = this._mutation;
         this._ignoreAllChanges = false;
@@ -830,7 +869,7 @@ class Squire {
             });
             this._ignoreChange = false;
         }
-        return this
+        return this;
     }
 
     _docWasChanged(): void {
@@ -855,10 +894,16 @@ class Squire {
     }
 
     _handleMutationChanges(records: MutationRecord[]): void {
-        this.fireEvent("mutation", { records })
+        this.fireEvent('mutation', { records });
 
-        if (!records.length || !this._config.ignoreRootAttributes || records.some(r => r.type !== "attributes" && r.target !== this.getRoot())) {
-            this._docWasChanged()
+        if (
+            !records.length ||
+            !this._config.ignoreRootAttributes ||
+            records.some(
+                (r) => r.type !== 'attributes' && r.target !== this.getRoot(),
+            )
+        ) {
+            this._docWasChanged();
         }
     }
 
@@ -1051,21 +1096,21 @@ class Squire {
         root.appendChild(frag);
 
         // Reset the undo stack
-        this.clearUndoStack()
+        this.clearUndoStack();
 
         return this;
     }
 
     /**
      * Reset the undo stack
-    */
+     */
     clearUndoStack() {
         this._undoIndex = -1;
         this._undoStack.length = 0;
         this._undoStackLength = 0;
         this._isInUndoState = false;
 
-        const root = this.getRoot()
+        const root = this.getRoot();
         // Record undo state
         const range =
             this._getRangeAndRemoveBookmark() ||
@@ -1577,7 +1622,7 @@ class Squire {
         partial?: boolean,
     ): Range {
         // Add bookmark
-        const { cantFocusEmptyTextNodes } = getConstants()
+        const { cantFocusEmptyTextNodes } = getConstants();
         this._saveRangeToBookmark(range);
 
         // We need a node in the selection to break the surrounding
@@ -1902,12 +1947,12 @@ class Squire {
         return this.changeFormat(
             name
                 ? {
-                    tag: 'SPAN',
-                    attributes: {
-                        class: className,
-                        style: 'font-family: ' + name + ', sans-serif;',
-                    },
-                }
+                      tag: 'SPAN',
+                      attributes: {
+                          class: className,
+                          style: 'font-family: ' + name + ', sans-serif;',
+                      },
+                  }
                 : null,
             {
                 tag: 'SPAN',
@@ -1921,14 +1966,14 @@ class Squire {
         return this.changeFormat(
             size
                 ? {
-                    tag: 'SPAN',
-                    attributes: {
-                        class: className,
-                        style:
-                            'font-size: ' +
-                            (typeof size === 'number' ? size + 'px' : size),
-                    },
-                }
+                      tag: 'SPAN',
+                      attributes: {
+                          class: className,
+                          style:
+                              'font-size: ' +
+                              (typeof size === 'number' ? size + 'px' : size),
+                      },
+                  }
                 : null,
             {
                 tag: 'SPAN',
@@ -1942,12 +1987,12 @@ class Squire {
         return this.changeFormat(
             color
                 ? {
-                    tag: 'SPAN',
-                    attributes: {
-                        class: className,
-                        style: 'color:' + color,
-                    },
-                }
+                      tag: 'SPAN',
+                      attributes: {
+                          class: className,
+                          style: 'color:' + color,
+                      },
+                  }
                 : null,
             {
                 tag: 'SPAN',
@@ -1961,12 +2006,12 @@ class Squire {
         return this.changeFormat(
             color
                 ? {
-                    tag: 'SPAN',
-                    attributes: {
-                        class: className,
-                        style: 'background-color:' + color,
-                    },
-                }
+                      tag: 'SPAN',
+                      attributes: {
+                          class: className,
+                          style: 'background-color:' + color,
+                      },
+                  }
                 : null,
             {
                 tag: 'SPAN',
@@ -2210,7 +2255,7 @@ class Squire {
      * @param fn function to call on every blocks in selection. To stop next iteration return any truthy value
      * @param mutates does your operations mutates/changes anything
      * @param range optional custom range to modify in that range.
-    */
+     */
     forEachBlock(
         fn: (el: HTMLElement) => any,
         mutates: boolean,
@@ -2300,9 +2345,13 @@ class Squire {
 
     // ---
 
-    setTextAlignment(alignment: "left" | "right" | "center" | "justify" | string): Squire {
-        const { align } = this._config.classNames
-        const assign = ["left", "right", "center", "justify"].includes(alignment)
+    setTextAlignment(
+        alignment: 'left' | 'right' | 'center' | 'justify' | string,
+    ): Squire {
+        const { align } = this._config.classNames;
+        const assign = ['left', 'right', 'center', 'justify'].includes(
+            alignment,
+        );
         this.forEachBlock((block: HTMLElement) => {
             const className = block.className
                 .split(/\s+/)
@@ -2311,7 +2360,11 @@ class Squire {
                 })
                 .join(' ');
             if (assign) {
-                block.className = (className ? className + ' ' : '') + align + '-' + alignment;
+                block.className =
+                    (className ? className + ' ' : '') +
+                    align +
+                    '-' +
+                    alignment;
                 block.style.textAlign = alignment;
             } else {
                 block.className = className;

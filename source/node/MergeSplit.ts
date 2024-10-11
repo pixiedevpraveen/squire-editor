@@ -12,7 +12,7 @@ import { isInline, isContainer } from './Category';
 // ---
 
 const fixCursor = (node: Node): Node => {
-    const { cantFocusEmptyTextNodes } = getConstants()
+    const { cantFocusEmptyTextNodes } = getConstants();
     // In Webkit and Gecko, block level elements are collapsed and
     // unfocusable if they have no content. To remedy this, a <BR> must be
     // inserted. In Opera and IE, we just need a textnode in order for the
@@ -53,7 +53,7 @@ const fixCursor = (node: Node): Node => {
     if (fixer) {
         try {
             node.appendChild(fixer);
-        } catch (error) { }
+        } catch (error) {}
     }
 
     return node;

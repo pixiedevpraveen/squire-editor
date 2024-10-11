@@ -23,7 +23,7 @@ const extractRangeToClipboard = (
     toPlainText: null | ((html: string) => string),
     plainTextOnly: boolean,
 ): boolean => {
-    const { isLegacyEdge, isWin } = getConstants()
+    const { isLegacyEdge, isWin } = getConstants();
 
     // Edge only seems to support setting plain text as of 2016-03-11.
     const clipboardData = event.clipboardData;
@@ -173,7 +173,7 @@ const _monitorShiftKey = function (this: Squire, event: KeyboardEvent): void {
 };
 
 const _onPaste = function (this: Squire, event: ClipboardEvent): void {
-    const { isLegacyEdge, isGecko } = getConstants()
+    const { isLegacyEdge, isGecko } = getConstants();
 
     const clipboardData = event.clipboardData;
     const items = clipboardData?.items;
