@@ -1,11 +1,11 @@
 type NODE_TYPE = 1 | 4 | 5;
-const SHOW_ELEMENT = 1; // NodeFilter.SHOW_ELEMENT;
-const SHOW_TEXT = 4; // NodeFilter.SHOW_TEXT;
-const SHOW_ELEMENT_OR_TEXT = 5; // SHOW_ELEMENT|SHOW_TEXT;
+export const SHOW_ELEMENT = 1; // NodeFilter.SHOW_ELEMENT;
+export const SHOW_TEXT = 4; // NodeFilter.SHOW_TEXT;
+export const SHOW_ELEMENT_OR_TEXT = 5; // SHOW_ELEMENT|SHOW_TEXT;
 
 const always = (): true => true;
 
-class TreeIterator<T extends Node> {
+export class TreeIterator<T extends Node> {
     root: Node;
     currentNode: Node;
     nodeType: NODE_TYPE;
@@ -24,8 +24,8 @@ class TreeIterator<T extends Node> {
             nodeType === Node.ELEMENT_NODE
                 ? SHOW_ELEMENT
                 : nodeType === Node.TEXT_NODE
-                  ? SHOW_TEXT
-                  : 0;
+                    ? SHOW_TEXT
+                    : 0;
         return !!(nodeFilterType & this.nodeType) && this.filter(node as T);
     }
 
@@ -110,7 +110,3 @@ class TreeIterator<T extends Node> {
         }
     }
 }
-
-// ---
-
-export { TreeIterator, SHOW_ELEMENT, SHOW_TEXT, SHOW_ELEMENT_OR_TEXT };

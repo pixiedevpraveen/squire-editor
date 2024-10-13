@@ -1,8 +1,6 @@
 import { isLeaf } from './Category';
 
-// ---
-
-const createElement = (
+export const createElement = (
     tag: string,
     props?: Record<string, string> | null,
     children?: Node[],
@@ -28,7 +26,7 @@ const createElement = (
 
 // --- Tests
 
-const areAlike = (
+export const areAlike = (
     node: HTMLElement | Node,
     node2: HTMLElement | Node,
 ): boolean => {
@@ -48,7 +46,7 @@ const areAlike = (
     return true;
 };
 
-const hasTagAttributes = (
+export const hasTagAttributes = (
     node: Node | Element,
     tag: string,
     attributes?: Record<string, string> | null,
@@ -69,7 +67,7 @@ const hasTagAttributes = (
 
 // --- Traversal
 
-const getNearest = (
+export const getNearest = (
     node: Node | null,
     root: Element | DocumentFragment,
     tag: string,
@@ -84,7 +82,7 @@ const getNearest = (
     return null;
 };
 
-const getNodeBeforeOffset = (node: Node, offset: number): Node => {
+export const getNodeBeforeOffset = (node: Node, offset: number): Node => {
     let children = node.childNodes;
     while (offset && node instanceof Element) {
         node = children[offset - 1];
@@ -94,7 +92,7 @@ const getNodeBeforeOffset = (node: Node, offset: number): Node => {
     return node;
 };
 
-const getNodeAfterOffset = (node: Node, offset: number): Node | null => {
+export const getNodeAfterOffset = (node: Node, offset: number): Node | null => {
     let returnNode: Node | null = node;
     if (returnNode instanceof Element) {
         const children = returnNode.childNodes;
@@ -112,7 +110,7 @@ const getNodeAfterOffset = (node: Node, offset: number): Node | null => {
     return returnNode;
 };
 
-const getLength = (node: Node): number => {
+export const getLength = (node: Node): number => {
     return node instanceof Element || node instanceof DocumentFragment
         ? node.childNodes.length
         : node instanceof CharacterData
@@ -122,7 +120,7 @@ const getLength = (node: Node): number => {
 
 // --- Manipulation
 
-const empty = (node: Node): DocumentFragment => {
+export const empty = (node: Node): DocumentFragment => {
     const frag = document.createDocumentFragment();
     let child = node.firstChild;
     while (child) {
@@ -132,7 +130,7 @@ const empty = (node: Node): DocumentFragment => {
     return frag;
 };
 
-const detach = (node: Node): Node => {
+export const detach = (node: Node): Node => {
     const parent = node.parentNode;
     if (parent) {
         parent.removeChild(node);
@@ -140,24 +138,9 @@ const detach = (node: Node): Node => {
     return node;
 };
 
-const replaceWith = (node: Node, node2: Node): void => {
+export const replaceWith = (node: Node, node2: Node): void => {
     const parent = node.parentNode;
     if (parent) {
         parent.replaceChild(node2, node);
     }
-};
-
-// --- Export
-
-export {
-    areAlike,
-    createElement,
-    detach,
-    empty,
-    getLength,
-    getNearest,
-    getNodeAfterOffset,
-    getNodeBeforeOffset,
-    hasTagAttributes,
-    replaceWith,
 };

@@ -23,14 +23,14 @@ import {
 
 // ---
 
-function createRange(startContainer: Node, startOffset: number): Range;
-function createRange(
+export function createRange(startContainer: Node, startOffset: number): Range;
+export function createRange(
     startContainer: Node,
     startOffset: number,
     endContainer: Node,
     endOffset: number,
 ): Range;
-function createRange(
+export function createRange(
     startContainer: Node,
     startOffset: number,
     endContainer?: Node,
@@ -46,7 +46,7 @@ function createRange(
     return range;
 }
 
-const insertNodeInRange = (range: Range, node: Node): void => {
+export const insertNodeInRange = (range: Range, node: Node): void => {
     // Insert at start.
     let { startContainer, startOffset, endContainer, endOffset } = range;
     let children: NodeListOf<ChildNode>;
@@ -103,7 +103,7 @@ const insertNodeInRange = (range: Range, node: Node): void => {
  * before/after the split. If the start/end have the same parents, it will
  * be collapsed.
  */
-const extractContentsOfRange = (
+export const extractContentsOfRange = (
     range: Range,
     common: Node | null,
     root: Element,
@@ -158,7 +158,7 @@ const extractContentsOfRange = (
 /**
  * Returns the next/prev node that's part of the same inline content.
  */
-const getAdjacentInlineNode = (
+export const getAdjacentInlineNode = (
     iterator: TreeIterator<Node>,
     method: 'nextNode' | 'previousPONode',
     node: Node,
@@ -176,7 +176,7 @@ const getAdjacentInlineNode = (
     return null;
 };
 
-const deleteContentsOfRange = (
+export const deleteContentsOfRange = (
     range: Range,
     root: Element,
 ): DocumentFragment => {
@@ -293,7 +293,7 @@ const deleteContentsOfRange = (
 
 // Contents of range will be deleted.
 // After method, range will be around inserted content
-const insertTreeFragmentIntoRange = (
+export const insertTreeFragmentIntoRange = (
     range: Range,
     frag: DocumentFragment,
     root: Element,
@@ -431,14 +431,4 @@ const insertTreeFragmentIntoRange = (
         range.setEnd(tempRange.endContainer, tempRange.endOffset);
     }
     moveRangeBoundariesDownTree(range);
-};
-
-// ---
-
-export {
-    createRange,
-    deleteContentsOfRange,
-    extractContentsOfRange,
-    insertNodeInRange,
-    insertTreeFragmentIntoRange,
 };

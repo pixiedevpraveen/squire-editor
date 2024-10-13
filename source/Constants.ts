@@ -1,13 +1,13 @@
-const DOCUMENT_POSITION_PRECEDING = 2; // Node.DOCUMENT_POSITION_PRECEDING
-const ELEMENT_NODE = 1; // Node.ELEMENT_NODE;
-const TEXT_NODE = 3; // Node.TEXT_NODE;
-const DOCUMENT_NODE = 9; // Node.DOCUMENT_NODE;
-const DOCUMENT_FRAGMENT_NODE = 11; // Node.DOCUMENT_FRAGMENT_NODE;
+export const DOCUMENT_POSITION_PRECEDING = 2; // Node.DOCUMENT_POSITION_PRECEDING
+export const ELEMENT_NODE = 1; // Node.ELEMENT_NODE;
+export const TEXT_NODE = 3; // Node.TEXT_NODE;
+export const DOCUMENT_NODE = 9; // Node.DOCUMENT_NODE;
+export const DOCUMENT_FRAGMENT_NODE = 11; // Node.DOCUMENT_FRAGMENT_NODE;
 
-const ZWS = '\u200B';
+export const ZWS = '\u200B';
 
 // Use [^ \t\r\n] instead of \S so that nbsp does not count as white-space
-const notWS = /[^ \t\r\n]/;
+export const notWS = /[^ \t\r\n]/;
 
 const CONSTANTS = {} as {
     init: boolean;
@@ -24,7 +24,7 @@ const CONSTANTS = {} as {
     supportsInputEvents: boolean;
 };
 
-function getConstants() {
+export function getClientConstants() {
     if (!CONSTANTS.init) {
         CONSTANTS.ua = navigator.userAgent;
         CONSTANTS.isMac = /Mac OS X/.test(CONSTANTS.ua);
@@ -48,16 +48,3 @@ function getConstants() {
 
     return CONSTANTS;
 }
-
-// ---
-
-export {
-    DOCUMENT_POSITION_PRECEDING,
-    ELEMENT_NODE,
-    TEXT_NODE,
-    DOCUMENT_NODE,
-    DOCUMENT_FRAGMENT_NODE,
-    notWS,
-    ZWS,
-    getConstants,
-};

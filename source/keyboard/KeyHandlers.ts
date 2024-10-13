@@ -1,4 +1,4 @@
-import { getConstants } from '../Constants';
+import { getClientConstants } from '../Constants';
 import { deleteContentsOfRange } from '../range/InsertDelete';
 import type { Squire } from '../Editor';
 import { Enter } from './Enter';
@@ -11,9 +11,9 @@ import { moveRangeBoundariesDownTree } from '../range/Boundaries';
 
 // ---
 
-function getKeyHandlers() {
+export function getKeyHandlers() {
     const { isWin, ctrlKey, supportsInputEvents, isIOS, isMac } =
-        getConstants();
+        getClientConstants();
 
     // Ref: http://unixpapa.com/js/key.html
     const _onKey = function (this: Squire, event: KeyboardEvent): void {
@@ -230,5 +230,3 @@ function getKeyHandlers() {
             };
     return { _onKey, keyHandlers };
 }
-
-export { getKeyHandlers };

@@ -1,4 +1,4 @@
-import { notWS, getConstants } from './Constants';
+import { notWS, getClientConstants } from './Constants';
 import { createElement, detach } from './node/Node';
 import { getStartBlockOfRange, getEndBlockOfRange } from './range/Block';
 import { createRange, deleteContentsOfRange } from './range/InsertDelete';
@@ -14,7 +14,7 @@ import { getTextContentsOfRange } from './range/Contents';
 
 const indexOf = Array.prototype.indexOf;
 
-const extractRangeToClipboard = (
+export const extractRangeToClipboard = (
     event: ClipboardEvent,
     range: Range,
     root: HTMLElement,
@@ -23,7 +23,7 @@ const extractRangeToClipboard = (
     toPlainText: null | ((html: string) => string),
     plainTextOnly: boolean,
 ): boolean => {
-    const { isLegacyEdge, isWin } = getConstants();
+    const { isLegacyEdge, isWin } = getClientConstants();
 
     // Edge only seems to support setting plain text as of 2016-03-11.
     const clipboardData = event.clipboardData;
@@ -118,7 +118,7 @@ const extractRangeToClipboard = (
 
 // ---
 
-const _onCut = function (this: Squire, event: ClipboardEvent): void {
+export const _onCut = function (this: Squire, event: ClipboardEvent): void {
     const range: Range = this.getSelection();
     const root: HTMLElement = this._root;
 
@@ -154,7 +154,7 @@ const _onCut = function (this: Squire, event: ClipboardEvent): void {
     this.setSelection(range);
 };
 
-const _onCopy = function (this: Squire, event: ClipboardEvent): void {
+export const _onCopy = function (this: Squire, event: ClipboardEvent): void {
     extractRangeToClipboard(
         event,
         this.getSelection(),
@@ -168,12 +168,12 @@ const _onCopy = function (this: Squire, event: ClipboardEvent): void {
 
 // Need to monitor for shift key like this, as event.shiftKey is not available
 // in paste event.
-const _monitorShiftKey = function (this: Squire, event: KeyboardEvent): void {
+export const _monitorShiftKey = function (this: Squire, event: KeyboardEvent): void {
     this._isShiftDown = event.shiftKey;
 };
 
-const _onPaste = function (this: Squire, event: ClipboardEvent): void {
-    const { isLegacyEdge, isGecko } = getConstants();
+export const _onPaste = function (this: Squire, event: ClipboardEvent): void {
+    const { isLegacyEdge, isGecko } = getClientConstants();
 
     const clipboardData = event.clipboardData;
     const items = clipboardData?.items;
@@ -360,7 +360,7 @@ const _onPaste = function (this: Squire, event: ClipboardEvent): void {
 // On Windows you can drag an drop text. We can't handle this ourselves, because
 // as far as I can see, there's no way to get the drop insertion point. So just
 // save an undo state and hope for the best.
-const _onDrop = function (this: Squire, event: DragEvent): void {
+export const _onDrop = function (this: Squire, event: DragEvent): void {
     // it's possible for dataTransfer to be null, let's avoid it.
     if (!event.dataTransfer) {
         return;
@@ -384,15 +384,4 @@ const _onDrop = function (this: Squire, event: DragEvent): void {
     if (hasHTML || (hasPlain && this.saveUndoState)) {
         this.saveUndoState();
     }
-};
-
-// ---
-
-export {
-    extractRangeToClipboard,
-    _onCut,
-    _onCopy,
-    _monitorShiftKey,
-    _onPaste,
-    _onDrop,
 };

@@ -13,7 +13,7 @@ import type { Squire } from '../Editor';
 // replace it with a <font> tag (!). If you delete all the text inside a
 // link in Opera, it won't delete the link. Let's make things consistent. If
 // you delete all text inside an inline tag, remove the inline tag.
-const afterDelete = (self: Squire, range?: Range): void => {
+export const afterDelete = (self: Squire, range?: Range): void => {
     try {
         if (!range) {
             range = self.getSelection();
@@ -69,7 +69,7 @@ const afterDelete = (self: Squire, range?: Range): void => {
     }
 };
 
-const detachUneditableNode = (node: Node, root: Element): void => {
+export const detachUneditableNode = (node: Node, root: Element): void => {
     let parent: Node | null;
     while ((parent = node.parentNode)) {
         if (parent === root || (parent as HTMLElement).isContentEditable) {
@@ -82,7 +82,7 @@ const detachUneditableNode = (node: Node, root: Element): void => {
 
 // ---
 
-const linkifyText = (self: Squire, textNode: Text, offset: number): void => {
+export const linkifyText = (self: Squire, textNode: Text, offset: number): void => {
     if (getNearest(textNode, self._root, 'A')) {
         return;
     }
@@ -134,7 +134,3 @@ const linkifyText = (self: Squire, textNode: Text, offset: number): void => {
         self.setSelection(selection);
     }
 };
-
-// ---
-
-export { afterDelete, detachUneditableNode, linkifyText };

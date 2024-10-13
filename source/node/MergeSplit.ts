@@ -1,4 +1,4 @@
-import { ZWS, getConstants } from '../Constants';
+import { ZWS, getClientConstants } from '../Constants';
 import {
     createElement,
     getNearest,
@@ -11,8 +11,8 @@ import { isInline, isContainer } from './Category';
 
 // ---
 
-const fixCursor = (node: Node): Node => {
-    const { cantFocusEmptyTextNodes } = getConstants();
+export const fixCursor = (node: Node): Node => {
+    const { cantFocusEmptyTextNodes } = getClientConstants();
     // In Webkit and Gecko, block level elements are collapsed and
     // unfocusable if they have no content. To remedy this, a <BR> must be
     // inserted. In Opera and IE, we just need a textnode in order for the
@@ -60,7 +60,7 @@ const fixCursor = (node: Node): Node => {
 };
 
 // Recursively examine container nodes and wrap any inline children.
-const fixContainer = (
+export const fixContainer = (
     container: Node,
     root: Element | DocumentFragment,
 ): Node => {
@@ -94,7 +94,7 @@ const fixContainer = (
     return container;
 };
 
-const split = (
+export const split = (
     node: Node,
     offset: number | Node | null,
     stopNode: Node,
@@ -209,7 +209,7 @@ const _mergeInlines = (
     }
 };
 
-const mergeInlines = (node: Node, range: Range): void => {
+export const mergeInlines = (node: Node, range: Range): void => {
     const element = node instanceof Text ? node.parentNode : node;
     if (element instanceof Element) {
         const fakeRange = {
@@ -224,7 +224,7 @@ const mergeInlines = (node: Node, range: Range): void => {
     }
 };
 
-const mergeWithBlock = (
+export const mergeWithBlock = (
     block: Node,
     next: Node,
     range: Range,
@@ -259,7 +259,7 @@ const mergeWithBlock = (
     mergeInlines(block, range);
 };
 
-const mergeContainers = (node: Node, root: Element): void => {
+export const mergeContainers = (node: Node, root: Element): void => {
     const prev = node.previousSibling;
     const first = node.firstChild;
     const isListItem = node.nodeName === 'LI';
@@ -293,15 +293,4 @@ const mergeContainers = (node: Node, root: Element): void => {
         node.insertBefore(block, first);
         fixCursor(block);
     }
-};
-
-// ---
-
-export {
-    fixContainer,
-    fixCursor,
-    mergeContainers,
-    mergeInlines,
-    mergeWithBlock,
-    split,
 };

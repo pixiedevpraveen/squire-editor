@@ -41,7 +41,7 @@ import {
 } from './node/MergeSplit';
 import { getBlockWalker, getNextBlock, isEmptyBlock } from './node/Block';
 import { cleanTree, cleanupBRs, escapeHTML, removeEmptyInlines } from './Clean';
-import { getConstants, ZWS } from './Constants';
+import { getClientConstants, ZWS } from './Constants';
 import {
     expandRangeToBlockBoundaries,
     getEndBlockOfRange,
@@ -61,8 +61,6 @@ import { linkifyText } from './keyboard/KeyHelpers';
 import { getTextContentsOfRange } from './range/Contents';
 
 declare const DOMPurify: any;
-
-// ---
 
 type CustomEvents =
     | 'pathChange'
@@ -98,7 +96,7 @@ type TagAttributes = {
     [key: string]: { [key: string]: string };
 };
 
-interface SquireConfig {
+export type SquireConfig = {
     blockTag: string;
     blockAttributes: null | Record<string, string>;
     tagAttributes: TagAttributes;
@@ -121,9 +119,7 @@ interface SquireConfig {
     didError: (x: any) => void;
 }
 
-// ---
-
-class Squire {
+export class Squire {
     _root: HTMLElement;
     _config: SquireConfig;
 
@@ -418,8 +414,8 @@ class Squire {
                 detail instanceof Event
                     ? detail
                     : new CustomEvent(type, {
-                          detail,
-                      });
+                        detail,
+                    });
             // Clone handlers array, so any handlers added/removed do not
             // affect it.
             handlers = handlers.slice();
@@ -1622,7 +1618,7 @@ class Squire {
         partial?: boolean,
     ): Range {
         // Add bookmark
-        const { cantFocusEmptyTextNodes } = getConstants();
+        const { cantFocusEmptyTextNodes } = getClientConstants();
         this._saveRangeToBookmark(range);
 
         // We need a node in the selection to break the surrounding
@@ -1947,12 +1943,12 @@ class Squire {
         return this.changeFormat(
             name
                 ? {
-                      tag: 'SPAN',
-                      attributes: {
-                          class: className,
-                          style: 'font-family: ' + name + ', sans-serif;',
-                      },
-                  }
+                    tag: 'SPAN',
+                    attributes: {
+                        class: className,
+                        style: 'font-family: ' + name + ', sans-serif;',
+                    },
+                }
                 : null,
             {
                 tag: 'SPAN',
@@ -1966,14 +1962,14 @@ class Squire {
         return this.changeFormat(
             size
                 ? {
-                      tag: 'SPAN',
-                      attributes: {
-                          class: className,
-                          style:
-                              'font-size: ' +
-                              (typeof size === 'number' ? size + 'px' : size),
-                      },
-                  }
+                    tag: 'SPAN',
+                    attributes: {
+                        class: className,
+                        style:
+                            'font-size: ' +
+                            (typeof size === 'number' ? size + 'px' : size),
+                    },
+                }
                 : null,
             {
                 tag: 'SPAN',
@@ -1987,12 +1983,12 @@ class Squire {
         return this.changeFormat(
             color
                 ? {
-                      tag: 'SPAN',
-                      attributes: {
-                          class: className,
-                          style: 'color:' + color,
-                      },
-                  }
+                    tag: 'SPAN',
+                    attributes: {
+                        class: className,
+                        style: 'color:' + color,
+                    },
+                }
                 : null,
             {
                 tag: 'SPAN',
@@ -2006,12 +2002,12 @@ class Squire {
         return this.changeFormat(
             color
                 ? {
-                      tag: 'SPAN',
-                      attributes: {
-                          class: className,
-                          style: 'background-color:' + color,
-                      },
-                  }
+                    tag: 'SPAN',
+                    attributes: {
+                        class: className,
+                        style: 'background-color:' + color,
+                    },
+                }
                 : null,
             {
                 tag: 'SPAN',
@@ -2908,8 +2904,3 @@ class Squire {
         return this.focus();
     }
 }
-
-// ---
-
-export { Squire };
-export type { SquireConfig };

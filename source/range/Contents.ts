@@ -4,7 +4,7 @@ import { isInline } from '../node/Category';
 
 // ---
 
-const getTextContentsOfRange = (range: Range) => {
+export const getTextContentsOfRange = (range: Range) => {
     if (range.collapsed) {
         return '';
     }
@@ -59,7 +59,3 @@ const getTextContentsOfRange = (range: Range) => {
 
     return textContent;
 };
-
-// ---
-
-export { getTextContentsOfRange };

@@ -10,7 +10,7 @@ const START_TO_END = 1; // Range.START_TO_END
 const END_TO_END = 2; // Range.END_TO_END
 const END_TO_START = 3; // Range.END_TO_START
 
-const isNodeContainedInRange = (
+export const isNodeContainedInRange = (
     range: Range,
     node: Node,
     partial: boolean,
@@ -40,7 +40,7 @@ const isNodeContainedInRange = (
  * Moves the range to an equivalent position with the start/end as deep in
  * the tree as possible.
  */
-const moveRangeBoundariesDownTree = (range: Range): void => {
+export const moveRangeBoundariesDownTree = (range: Range): void => {
     let { startContainer, startOffset, endContainer, endOffset } = range;
 
     while (!(startContainer instanceof Text)) {
@@ -103,7 +103,7 @@ const moveRangeBoundariesDownTree = (range: Range): void => {
     range.setEnd(endContainer, endOffset);
 };
 
-const moveRangeBoundariesUpTree = (
+export const moveRangeBoundariesUpTree = (
     range: Range,
     startMax: Node,
     endMax: Node,
@@ -160,7 +160,7 @@ const moveRangeBoundariesUpTree = (
     range.setEnd(endContainer, endOffset);
 };
 
-const moveRangeBoundaryOutOf = (
+export const moveRangeBoundaryOutOf = (
     range: Range,
     tag: string,
     root: Element,
@@ -175,13 +175,4 @@ const moveRangeBoundaryOutOf = (
         }
     }
     return range;
-};
-
-// ---
-
-export {
-    isNodeContainedInRange,
-    moveRangeBoundariesDownTree,
-    moveRangeBoundariesUpTree,
-    moveRangeBoundaryOutOf,
 };

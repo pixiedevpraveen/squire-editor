@@ -1,9 +1,7 @@
 import { TreeIterator, SHOW_ELEMENT } from './TreeIterator';
 import { isBlock } from './Category';
 
-// ---
-
-const getBlockWalker = (
+export const getBlockWalker = (
     node: Node,
     root: Element | DocumentFragment,
 ): TreeIterator<HTMLElement> => {
@@ -12,7 +10,7 @@ const getBlockWalker = (
     return walker;
 };
 
-const getPreviousBlock = (
+export const getPreviousBlock = (
     node: Node,
     root: Element | DocumentFragment,
 ): HTMLElement | null => {
@@ -20,7 +18,7 @@ const getPreviousBlock = (
     return block !== root ? block : null;
 };
 
-const getNextBlock = (
+export const getNextBlock = (
     node: Node,
     root: Element | DocumentFragment,
 ): HTMLElement | null => {
@@ -28,10 +26,6 @@ const getNextBlock = (
     return block !== root ? block : null;
 };
 
-const isEmptyBlock = (block: Element): boolean => {
+export const isEmptyBlock = (block: Element): boolean => {
     return !block.textContent && !block.querySelector('IMG');
 };
-
-// ---
-
-export { getBlockWalker, getPreviousBlock, getNextBlock, isEmptyBlock };

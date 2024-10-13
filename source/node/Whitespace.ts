@@ -12,7 +12,7 @@ const notWSTextNode = (node: Node): boolean => {
           notWS.test((node as CharacterData).data);
 };
 
-const isLineBreak = (br: Element, isLBIfEmptyBlock: boolean): boolean => {
+export const isLineBreak = (br: Element, isLBIfEmptyBlock: boolean): boolean => {
     let block = br.parentNode!;
     while (isInline(block)) {
         block = block.parentNode!;
@@ -34,7 +34,7 @@ const isLineBreak = (br: Element, isLBIfEmptyBlock: boolean): boolean => {
 // contained ZWS space then remove it too. We may want to keep one ZWS node at
 // the bottom of the tree so the block can be selected. Define that node as the
 // keepNode.
-const removeZWS = (root: Node, keepNode?: Node | null): void => {
+export const removeZWS = (root: Node, keepNode?: Node | null): void => {
     const walker = new TreeIterator<Text>(root, SHOW_TEXT);
     let textNode: Text | null;
     let index: number;
@@ -63,7 +63,3 @@ const removeZWS = (root: Node, keepNode?: Node | null): void => {
         }
     }
 };
-
-// ---
-
-export { isLineBreak, removeZWS };

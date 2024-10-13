@@ -9,7 +9,7 @@ import { TreeIterator, SHOW_ELEMENT_OR_TEXT } from '../node/TreeIterator';
 
 // Returns the first block at least partially contained by the range,
 // or null if no block is contained by the range.
-const getStartBlockOfRange = (
+export const getStartBlockOfRange = (
     range: Range,
     root: Element | DocumentFragment,
 ): HTMLElement | null => {
@@ -35,7 +35,7 @@ const getStartBlockOfRange = (
 
 // Returns the last block at least partially contained by the range,
 // or null if no block is contained by the range.
-const getEndBlockOfRange = (
+export const getEndBlockOfRange = (
     range: Range,
     root: Element | DocumentFragment,
 ): HTMLElement | null => {
@@ -72,7 +72,7 @@ const isContent = (node: Element | Text): boolean => {
         : node.nodeName === 'IMG';
 };
 
-const rangeDoesStartAtBlockBoundary = (
+export const rangeDoesStartAtBlockBoundary = (
     range: Range,
     root: Element,
 ): boolean => {
@@ -118,7 +118,7 @@ const rangeDoesStartAtBlockBoundary = (
     return !contentWalker.previousNode();
 };
 
-const rangeDoesEndAtBlockBoundary = (range: Range, root: Element): boolean => {
+export const rangeDoesEndAtBlockBoundary = (range: Range, root: Element): boolean => {
     const endContainer = range.endContainer;
     const endOffset = range.endOffset;
     let currentNode: Node;
@@ -152,7 +152,7 @@ const rangeDoesEndAtBlockBoundary = (range: Range, root: Element): boolean => {
     return !contentWalker.nextNode();
 };
 
-const expandRangeToBlockBoundaries = (range: Range, root: Element): void => {
+export const expandRangeToBlockBoundaries = (range: Range, root: Element): void => {
     const start = getStartBlockOfRange(range, root);
     const end = getEndBlockOfRange(range, root);
     let parent: Node;
@@ -163,14 +163,4 @@ const expandRangeToBlockBoundaries = (range: Range, root: Element): void => {
         parent = end.parentNode!;
         range.setEnd(parent, Array.from(parent.childNodes).indexOf(end) + 1);
     }
-};
-
-// ---
-
-export {
-    getStartBlockOfRange,
-    getEndBlockOfRange,
-    rangeDoesStartAtBlockBoundary,
-    rangeDoesEndAtBlockBoundary,
-    expandRangeToBlockBoundaries,
 };

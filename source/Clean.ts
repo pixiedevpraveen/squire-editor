@@ -217,7 +217,7 @@ const blacklist = /^(?:HEAD|META|STYLE)/;
        and whitespace nodes.
     2. Convert inline tags into our preferred format.
 */
-const cleanTree = (
+export const cleanTree = (
     node: Node,
     config: SquireConfig,
     preserveWS?: boolean,
@@ -316,7 +316,7 @@ const cleanTree = (
 
 // ---
 
-const removeEmptyInlines = (node: Node): void => {
+export const removeEmptyInlines = (node: Node): void => {
     const children = node.childNodes;
     let l = children.length;
     while (l--) {
@@ -340,7 +340,7 @@ const removeEmptyInlines = (node: Node): void => {
 // line breaks by wrapping the inline text in a <div>. Browsers that want <br>
 // elements at the end of each block will then have them added back in a later
 // fixCursor method call.
-const cleanupBRs = (
+export const cleanupBRs = (
     node: Element | DocumentFragment,
     root: Element,
     keepForBlankLine: boolean,
@@ -378,7 +378,7 @@ const cleanupBRs = (
 
 // ---
 
-const escapeHTML = (text: string): string => {
+export const escapeHTML = (text: string): string => {
     return text
         .split('&')
         .join('&amp;')
@@ -392,4 +392,4 @@ const escapeHTML = (text: string): string => {
 
 // ---
 
-export { cleanTree, cleanupBRs, isLineBreak, removeEmptyInlines, escapeHTML };
+export { isLineBreak };

@@ -13,7 +13,7 @@ import { ZWS } from '../Constants';
 
 // ---
 
-const Space = (self: Squire, event: KeyboardEvent, range: Range): void => {
+export const Space = (self: Squire, event: KeyboardEvent, range: Range): void => {
     let node: Node | null;
     const root = self._root;
     self._recordUndoState(range);
@@ -79,7 +79,3 @@ const Space = (self: Squire, event: KeyboardEvent, range: Range): void => {
 
     self.setSelection(range);
 };
-
-// ---
-
-export { Space };

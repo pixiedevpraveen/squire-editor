@@ -8,7 +8,7 @@ import type { Squire } from '../Editor';
 
 // ---
 
-const Tab = (self: Squire, event: KeyboardEvent, range: Range): void => {
+export const Tab = (self: Squire, event: KeyboardEvent, range: Range): void => {
     const root = self._root;
     self._removeZWS();
     // If no selection and at start of block
@@ -29,7 +29,7 @@ const Tab = (self: Squire, event: KeyboardEvent, range: Range): void => {
     }
 };
 
-const ShiftTab = (self: Squire, event: KeyboardEvent, range: Range): void => {
+export const ShiftTab = (self: Squire, event: KeyboardEvent, range: Range): void => {
     const root = self._root;
     self._removeZWS();
     // If no selection and at start of block
@@ -42,7 +42,3 @@ const ShiftTab = (self: Squire, event: KeyboardEvent, range: Range): void => {
         }
     }
 };
-
-// ---
-
-export { Tab, ShiftTab };
