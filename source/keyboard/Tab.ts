@@ -29,7 +29,11 @@ export const Tab = (self: Squire, event: KeyboardEvent, range: Range): void => {
     }
 };
 
-export const ShiftTab = (self: Squire, event: KeyboardEvent, range: Range): void => {
+export const ShiftTab = (
+    self: Squire,
+    event: KeyboardEvent,
+    range: Range,
+): void => {
     const root = self._root;
     self._removeZWS();
     // If no selection and at start of block

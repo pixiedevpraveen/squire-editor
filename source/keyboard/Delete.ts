@@ -20,7 +20,11 @@ import type { Squire } from '../Editor';
 
 // ---
 
-export const Delete = (self: Squire, event: KeyboardEvent, range: Range): void => {
+export const Delete = (
+    self: Squire,
+    event: KeyboardEvent,
+    range: Range,
+): void => {
     const root = self._root;
     let current: Node | null;
     let next: Node | null;

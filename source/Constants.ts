@@ -26,24 +26,23 @@ const CONSTANTS = {} as {
 
 export function getClientConstants() {
     if (!CONSTANTS.init) {
-        CONSTANTS.ua = navigator.userAgent;
-        CONSTANTS.isMac = /Mac OS X/.test(CONSTANTS.ua);
+        const ua = (CONSTANTS.ua = navigator.userAgent);
+        CONSTANTS.isMac = /Mac OS X/.test(ua);
+        CONSTANTS.isLegacyEdge = /Edge\//.test(ua);
+        CONSTANTS.isWin = /Windows NT/.test(ua);
+        CONSTANTS.isAndroid = /Android/.test(ua);
+        CONSTANTS.isGecko = /Gecko\//.test(ua);
+        CONSTANTS.init = true;
+        CONSTANTS.cantFocusEmptyTextNodes = CONSTANTS.isWebKit =
+            !CONSTANTS.isLegacyEdge && /WebKit\//.test(ua);
         CONSTANTS.isIOS =
-            /iP(?:ad|hone|od)/.test(CONSTANTS.ua) ||
+            /iP(?:ad|hone|od)/.test(ua) ||
             (CONSTANTS.isMac && !!navigator.maxTouchPoints);
-        CONSTANTS.isLegacyEdge = /Edge\//.test(CONSTANTS.ua);
-        CONSTANTS.isWebKit =
-            !CONSTANTS.isLegacyEdge && /WebKit\//.test(CONSTANTS.ua);
-        CONSTANTS.isWin = /Windows NT/.test(CONSTANTS.ua);
-        CONSTANTS.isAndroid = /Android/.test(CONSTANTS.ua);
-        CONSTANTS.isGecko = /Gecko\//.test(CONSTANTS.ua);
         CONSTANTS.ctrlKey =
             CONSTANTS.isMac || CONSTANTS.isIOS ? 'Meta-' : 'Ctrl-';
-        CONSTANTS.cantFocusEmptyTextNodes = CONSTANTS.isWebKit;
         CONSTANTS.supportsInputEvents =
             'onbeforeinput' in document &&
             'inputType' in new InputEvent('input');
-        CONSTANTS.init = true;
     }
 
     return CONSTANTS;

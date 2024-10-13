@@ -82,7 +82,11 @@ export const detachUneditableNode = (node: Node, root: Element): void => {
 
 // ---
 
-export const linkifyText = (self: Squire, textNode: Text, offset: number): void => {
+export const linkifyText = (
+    self: Squire,
+    textNode: Text,
+    offset: number,
+): void => {
     if (getNearest(textNode, self._root, 'A')) {
         return;
     }

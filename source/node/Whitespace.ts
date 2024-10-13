@@ -12,7 +12,10 @@ const notWSTextNode = (node: Node): boolean => {
           notWS.test((node as CharacterData).data);
 };
 
-export const isLineBreak = (br: Element, isLBIfEmptyBlock: boolean): boolean => {
+export const isLineBreak = (
+    br: Element,
+    isLBIfEmptyBlock: boolean,
+): boolean => {
     let block = br.parentNode!;
     while (isInline(block)) {
         block = block.parentNode!;

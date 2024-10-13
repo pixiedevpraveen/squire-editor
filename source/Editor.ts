@@ -117,7 +117,7 @@ export type SquireConfig = {
     toPlainText: null | ((html: string) => string);
     sanitizeToDOMFragment: (html: string, editor: Squire) => DocumentFragment;
     didError: (x: any) => void;
-}
+};
 
 export class Squire {
     _root: HTMLElement;
@@ -414,8 +414,8 @@ export class Squire {
                 detail instanceof Event
                     ? detail
                     : new CustomEvent(type, {
-                        detail,
-                    });
+                          detail,
+                      });
             // Clone handlers array, so any handlers added/removed do not
             // affect it.
             handlers = handlers.slice();
@@ -1943,12 +1943,12 @@ export class Squire {
         return this.changeFormat(
             name
                 ? {
-                    tag: 'SPAN',
-                    attributes: {
-                        class: className,
-                        style: 'font-family: ' + name + ', sans-serif;',
-                    },
-                }
+                      tag: 'SPAN',
+                      attributes: {
+                          class: className,
+                          style: 'font-family: ' + name + ', sans-serif;',
+                      },
+                  }
                 : null,
             {
                 tag: 'SPAN',
@@ -1962,14 +1962,14 @@ export class Squire {
         return this.changeFormat(
             size
                 ? {
-                    tag: 'SPAN',
-                    attributes: {
-                        class: className,
-                        style:
-                            'font-size: ' +
-                            (typeof size === 'number' ? size + 'px' : size),
-                    },
-                }
+                      tag: 'SPAN',
+                      attributes: {
+                          class: className,
+                          style:
+                              'font-size: ' +
+                              (typeof size === 'number' ? size + 'px' : size),
+                      },
+                  }
                 : null,
             {
                 tag: 'SPAN',
@@ -1983,12 +1983,12 @@ export class Squire {
         return this.changeFormat(
             color
                 ? {
-                    tag: 'SPAN',
-                    attributes: {
-                        class: className,
-                        style: 'color:' + color,
-                    },
-                }
+                      tag: 'SPAN',
+                      attributes: {
+                          class: className,
+                          style: 'color:' + color,
+                      },
+                  }
                 : null,
             {
                 tag: 'SPAN',
@@ -2002,12 +2002,12 @@ export class Squire {
         return this.changeFormat(
             color
                 ? {
-                    tag: 'SPAN',
-                    attributes: {
-                        class: className,
-                        style: 'background-color:' + color,
-                    },
-                }
+                      tag: 'SPAN',
+                      attributes: {
+                          class: className,
+                          style: 'background-color:' + color,
+                      },
+                  }
                 : null,
             {
                 tag: 'SPAN',

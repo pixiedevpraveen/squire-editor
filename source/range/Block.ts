@@ -118,7 +118,10 @@ export const rangeDoesStartAtBlockBoundary = (
     return !contentWalker.previousNode();
 };
 
-export const rangeDoesEndAtBlockBoundary = (range: Range, root: Element): boolean => {
+export const rangeDoesEndAtBlockBoundary = (
+    range: Range,
+    root: Element,
+): boolean => {
     const endContainer = range.endContainer;
     const endOffset = range.endOffset;
     let currentNode: Node;
@@ -152,7 +155,10 @@ export const rangeDoesEndAtBlockBoundary = (range: Range, root: Element): boolea
     return !contentWalker.nextNode();
 };
 
-export const expandRangeToBlockBoundaries = (range: Range, root: Element): void => {
+export const expandRangeToBlockBoundaries = (
+    range: Range,
+    root: Element,
+): void => {
     const start = getStartBlockOfRange(range, root);
     const end = getEndBlockOfRange(range, root);
     let parent: Node;
