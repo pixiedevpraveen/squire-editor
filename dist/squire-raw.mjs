@@ -101,20 +101,19 @@ var DOCUMENT_FRAGMENT_NODE = 11;
 var ZWS = "\u200B";
 var notWS = /[^ \t\r\n]/;
 var CONSTANTS = {};
-function getConstants() {
+function getClientConstants() {
   if (!CONSTANTS.init) {
-    CONSTANTS.ua = navigator.userAgent;
-    CONSTANTS.isMac = /Mac OS X/.test(CONSTANTS.ua);
-    CONSTANTS.isIOS = /iP(?:ad|hone|od)/.test(CONSTANTS.ua) || CONSTANTS.isMac && !!navigator.maxTouchPoints;
-    CONSTANTS.isLegacyEdge = /Edge\//.test(CONSTANTS.ua);
-    CONSTANTS.isWebKit = !CONSTANTS.isLegacyEdge && /WebKit\//.test(CONSTANTS.ua);
-    CONSTANTS.isWin = /Windows NT/.test(CONSTANTS.ua);
-    CONSTANTS.isAndroid = /Android/.test(CONSTANTS.ua);
-    CONSTANTS.isGecko = /Gecko\//.test(CONSTANTS.ua);
-    CONSTANTS.ctrlKey = CONSTANTS.isMac || CONSTANTS.isIOS ? "Meta-" : "Ctrl-";
-    CONSTANTS.cantFocusEmptyTextNodes = CONSTANTS.isWebKit;
-    CONSTANTS.supportsInputEvents = "onbeforeinput" in document && "inputType" in new InputEvent("input");
+    const ua = CONSTANTS.ua = navigator.userAgent;
+    CONSTANTS.isMac = /Mac OS X/.test(ua);
+    CONSTANTS.isLegacyEdge = /Edge\//.test(ua);
+    CONSTANTS.isWin = /Windows NT/.test(ua);
+    CONSTANTS.isAndroid = /Android/.test(ua);
+    CONSTANTS.isGecko = /Gecko\//.test(ua);
     CONSTANTS.init = true;
+    CONSTANTS.cantFocusEmptyTextNodes = CONSTANTS.isWebKit = !CONSTANTS.isLegacyEdge && /WebKit\//.test(ua);
+    CONSTANTS.isIOS = /iP(?:ad|hone|od)/.test(ua) || CONSTANTS.isMac && !!navigator.maxTouchPoints;
+    CONSTANTS.ctrlKey = CONSTANTS.isMac || CONSTANTS.isIOS ? "Meta-" : "Ctrl-";
+    CONSTANTS.supportsInputEvents = "onbeforeinput" in document && "inputType" in new InputEvent("input");
   }
   return CONSTANTS;
 }
@@ -435,7 +434,7 @@ var moveRangeBoundaryOutOf = (range, tag, root) => {
 
 // source/node/MergeSplit.ts
 var fixCursor = (node) => {
-  const { cantFocusEmptyTextNodes } = getConstants();
+  const { cantFocusEmptyTextNodes } = getClientConstants();
   let fixer = null;
   if (node instanceof Text) {
     return node;
@@ -1373,7 +1372,7 @@ var getTextContentsOfRange = (range) => {
 // source/Clipboard.ts
 var indexOf = Array.prototype.indexOf;
 var extractRangeToClipboard = (event, range, root, removeRangeFromDocument, toCleanHTML, toPlainText, plainTextOnly) => {
-  const { isLegacyEdge, isWin } = getConstants();
+  const { isLegacyEdge, isWin } = getClientConstants();
   const clipboardData = event.clipboardData;
   if (isLegacyEdge || !clipboardData) {
     return false;
@@ -1473,7 +1472,7 @@ var _monitorShiftKey = function(event) {
   this._isShiftDown = event.shiftKey;
 };
 var _onPaste = function(event) {
-  const { isLegacyEdge, isGecko } = getConstants();
+  const { isLegacyEdge, isGecko } = getClientConstants();
   const clipboardData = event.clipboardData;
   const items = clipboardData?.items;
   const choosePlain = this._isShiftDown;
@@ -1913,7 +1912,7 @@ var Space = (self, event, range) => {
 
 // source/keyboard/KeyHandlers.ts
 function getKeyHandlers() {
-  const { isWin, ctrlKey, supportsInputEvents, isIOS, isMac } = getConstants();
+  const { isWin, ctrlKey, supportsInputEvents, isIOS, isMac } = getClientConstants();
   const _onKey = function(event) {
     if (event.defaultPrevented || event.isComposing || !this.getRoot().isContentEditable) {
       return;
@@ -3247,7 +3246,7 @@ var Squire = class {
     return range;
   }
   _removeFormat(tag, attributes, range, partial) {
-    const { cantFocusEmptyTextNodes } = getConstants();
+    const { cantFocusEmptyTextNodes } = getClientConstants();
     this._saveRangeToBookmark(range);
     let fixer;
     if (range.collapsed) {

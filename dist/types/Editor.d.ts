@@ -9,7 +9,7 @@ type TagAttributes = {
         [key: string]: string;
     };
 };
-interface SquireConfig {
+export type SquireConfig = {
     blockTag: string;
     blockAttributes: null | Record<string, string>;
     tagAttributes: TagAttributes;
@@ -30,8 +30,8 @@ interface SquireConfig {
     toPlainText: null | ((html: string) => string);
     sanitizeToDOMFragment: (html: string, editor: Squire) => DocumentFragment;
     didError: (x: any) => void;
-}
-declare class Squire {
+};
+export declare class Squire {
     _root: HTMLElement;
     _config: SquireConfig;
     _isFocused: boolean;
@@ -198,6 +198,5 @@ declare class Squire {
     _removeFormatting(root: DocumentFragment | Element, clean: DocumentFragment | Element): DocumentFragment | Element;
     removeAllFormatting(range?: Range): Squire;
 }
-export { Squire };
-export type { SquireConfig };
+export {};
 //# sourceMappingURL=Editor.d.ts.map

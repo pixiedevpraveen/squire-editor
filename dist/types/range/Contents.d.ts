@@ -1,3 +1,2 @@
-declare const getTextContentsOfRange: (range: Range) => string;
-export { getTextContentsOfRange };
+export declare const getTextContentsOfRange: (range: Range) => string;
 //# sourceMappingURL=Contents.d.ts.map

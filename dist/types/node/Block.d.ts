@@ -1,7 +1,6 @@
 import { TreeIterator } from './TreeIterator';
-declare const getBlockWalker: (node: Node, root: Element | DocumentFragment) => TreeIterator<HTMLElement>;
-declare const getPreviousBlock: (node: Node, root: Element | DocumentFragment) => HTMLElement | null;
-declare const getNextBlock: (node: Node, root: Element | DocumentFragment) => HTMLElement | null;
-declare const isEmptyBlock: (block: Element) => boolean;
-export { getBlockWalker, getPreviousBlock, getNextBlock, isEmptyBlock };
+export declare const getBlockWalker: (node: Node, root: Element | DocumentFragment) => TreeIterator<HTMLElement>;
+export declare const getPreviousBlock: (node: Node, root: Element | DocumentFragment) => HTMLElement | null;
+export declare const getNextBlock: (node: Node, root: Element | DocumentFragment) => HTMLElement | null;
+export declare const isEmptyBlock: (block: Element) => boolean;
 //# sourceMappingURL=Block.d.ts.map

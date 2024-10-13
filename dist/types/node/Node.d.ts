@@ -1,12 +1,11 @@
-declare const createElement: (tag: string, props?: Record<string, string> | null, children?: Node[]) => HTMLElement;
-declare const areAlike: (node: HTMLElement | Node, node2: HTMLElement | Node) => boolean;
-declare const hasTagAttributes: (node: Node | Element, tag: string, attributes?: Record<string, string> | null) => boolean;
-declare const getNearest: (node: Node | null, root: Element | DocumentFragment, tag: string, attributes?: Record<string, string> | null) => Node | null;
-declare const getNodeBeforeOffset: (node: Node, offset: number) => Node;
-declare const getNodeAfterOffset: (node: Node, offset: number) => Node | null;
-declare const getLength: (node: Node) => number;
-declare const empty: (node: Node) => DocumentFragment;
-declare const detach: (node: Node) => Node;
-declare const replaceWith: (node: Node, node2: Node) => void;
-export { areAlike, createElement, detach, empty, getLength, getNearest, getNodeAfterOffset, getNodeBeforeOffset, hasTagAttributes, replaceWith, };
+export declare const createElement: (tag: string, props?: Record<string, string> | null, children?: Node[]) => HTMLElement;
+export declare const areAlike: (node: HTMLElement | Node, node2: HTMLElement | Node) => boolean;
+export declare const hasTagAttributes: (node: Node | Element, tag: string, attributes?: Record<string, string> | null) => boolean;
+export declare const getNearest: (node: Node | null, root: Element | DocumentFragment, tag: string, attributes?: Record<string, string> | null) => Node | null;
+export declare const getNodeBeforeOffset: (node: Node, offset: number) => Node;
+export declare const getNodeAfterOffset: (node: Node, offset: number) => Node | null;
+export declare const getLength: (node: Node) => number;
+export declare const empty: (node: Node) => DocumentFragment;
+export declare const detach: (node: Node) => Node;
+export declare const replaceWith: (node: Node, node2: Node) => void;
 //# sourceMappingURL=Node.d.ts.map

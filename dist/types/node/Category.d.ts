@@ -1,9 +1,8 @@
-declare const leafNodeNames: Set<string>;
-declare const resetNodeCategoryCache: () => void;
-declare const isLeaf: (node: Node) => boolean;
-declare const getNodeCategory: (node: Node) => number;
-declare const isInline: (node: Node) => boolean;
-declare const isBlock: (node: Node) => boolean;
-declare const isContainer: (node: Node) => boolean;
-export { getNodeCategory, isBlock, isContainer, isInline, isLeaf, leafNodeNames, resetNodeCategoryCache, };
+export declare const leafNodeNames: Set<string>;
+export declare const resetNodeCategoryCache: () => void;
+export declare const isLeaf: (node: Node) => boolean;
+export declare const getNodeCategory: (node: Node) => number;
+export declare const isInline: (node: Node) => boolean;
+export declare const isBlock: (node: Node) => boolean;
+export declare const isContainer: (node: Node) => boolean;
 //# sourceMappingURL=Category.d.ts.map

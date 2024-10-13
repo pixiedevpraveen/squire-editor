@@ -1,8 +1,8 @@
 type NODE_TYPE = 1 | 4 | 5;
-declare const SHOW_ELEMENT = 1;
-declare const SHOW_TEXT = 4;
-declare const SHOW_ELEMENT_OR_TEXT = 5;
-declare class TreeIterator<T extends Node> {
+export declare const SHOW_ELEMENT = 1;
+export declare const SHOW_TEXT = 4;
+export declare const SHOW_ELEMENT_OR_TEXT = 5;
+export declare class TreeIterator<T extends Node> {
     root: Node;
     currentNode: Node;
     nodeType: NODE_TYPE;
@@ -13,5 +13,5 @@ declare class TreeIterator<T extends Node> {
     previousNode(): T | null;
     previousPONode(): T | null;
 }
-export { TreeIterator, SHOW_ELEMENT, SHOW_TEXT, SHOW_ELEMENT_OR_TEXT };
+export {};
 //# sourceMappingURL=TreeIterator.d.ts.map

@@ -1,5 +1,4 @@
 import type { Squire } from '../Editor';
-declare const Tab: (self: Squire, event: KeyboardEvent, range: Range) => void;
-declare const ShiftTab: (self: Squire, event: KeyboardEvent, range: Range) => void;
-export { Tab, ShiftTab };
+export declare const Tab: (self: Squire, event: KeyboardEvent, range: Range) => void;
+export declare const ShiftTab: (self: Squire, event: KeyboardEvent, range: Range) => void;
 //# sourceMappingURL=Tab.d.ts.map
