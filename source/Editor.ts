@@ -284,7 +284,7 @@ export class Squire {
         return config;
     }
 
-    setKeyHandler(key: string, fn: KeyHandlerFunction) {
+    setKeyHandler(key: string, fn: KeyHandlerFunction): Squire {
         this._keyHandlers[key] = fn;
         return this;
     }
@@ -439,7 +439,7 @@ export class Squire {
      * document node, since these events are fired in a custom manner by the
      * editor code.
      */
-    customEvents = new Set([
+    customEvents: Set<string> = new Set([
         'pathChange',
         'select',
         'input',
@@ -770,7 +770,7 @@ export class Squire {
         });
     }
 
-    _getPath(node: Node) {
+    _getPath(node: Node): string {
         const root = this._root;
         const config = this._config;
         let path = '';
@@ -2411,7 +2411,7 @@ export class Squire {
         return [list, startLi, endLi];
     }
 
-    increaseListLevel(range?: Range) {
+    increaseListLevel(range?: Range): Squire {
         if (!range) {
             range = this.getSelection();
         }
@@ -2458,7 +2458,7 @@ export class Squire {
         return this.focus();
     }
 
-    decreaseListLevel(range?: Range) {
+    decreaseListLevel(range?: Range): Squire {
         if (!range) {
             range = this.getSelection();
         }
