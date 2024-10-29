@@ -1,0 +1,5 @@
+{
+  "name": "@praveen/squire-editor",
+  "version": "1.5.2",
+  "exports": "./source/Squire.ts"
+}

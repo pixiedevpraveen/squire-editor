@@ -13,7 +13,18 @@ Squire supports all reasonably recent browsers. It no longer supports any versio
 
 ## Installation and usage
 
-1. Add Squire to your project: `npm install squire-editor`
+1. Add Squire to your project:
+```bash
+npm install squire-editor
+# or
+bun add squire-editor
+
+# or
+yarn add squire-editor
+
+# or in demo
+deno add jsr:@praveen/squire-editor
+```
 2. In your code, `import Squire from 'squire-editor';`
 3. Create your editor by calling `editor = new Squire(node);`.
 
